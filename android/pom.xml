@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>fr.duminy.safe</groupId>
+    <artifactId>safe-pom</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+    
+  <modelVersion>4.0.0</modelVersion>
+  
+  <artifactId>safe-android</artifactId>
+  <name>Safe Deposit Box - Android User Interface</name>
+  
+  <properties>
+      <project.root>${project.parent.basedir}</project.root>
+  </properties>  
+  
+  <dependencies>
+    <dependency>
+      <groupId>fr.duminy.safe</groupId>
+      <artifactId>safe-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>  
+</project>
