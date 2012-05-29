@@ -22,14 +22,15 @@ package fr.duminy.safe.core;
 
 import java.io.Serializable;
 
-public class TestClass implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -694561816770248758L;
-    
-    public String testString = "test string";
+import fr.duminy.safe.core.model.Named;
 
-    public TestClass() {
-    }
+public class TestClass extends Named implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 857767204477452919L;
+
+	public TestClass(String name) {
+		super(name);
+	}
 }
