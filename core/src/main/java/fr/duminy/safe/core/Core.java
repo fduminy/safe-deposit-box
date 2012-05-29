@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.duminy.safe.core.checksum.ChecksumException;
+import fr.duminy.safe.core.checksum.DefaultChecksum;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
 import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
 import fr.duminy.safe.core.model.DuplicateNameException;
@@ -59,11 +60,16 @@ abstract public class Core {
     }
     
     protected void init(MutablePicoContainer container) throws Exception {
-        File home = new File(java.lang.System.getProperty("user.home"));
-        container.addComponent(new DefaultStorage<Model>(new File(home, "passwords.safe")));
+        container.addComponent(new DefaultStorage<Model>(getPasswordFile()));
         
         container.addComponent(Model.class);
         container.addComponent(DefaultCryptoProvider.class);
+        container.addComponent(DefaultChecksum.class);
+    }
+    
+    protected File getPasswordFile() {
+        File home = new File(java.lang.System.getProperty("user.home"));
+    	return new File(home, "passwords.safe");
     }
     
     public final void start() {
@@ -115,7 +121,12 @@ abstract public class Core {
         if (storage != null) {
 			try {
 				Data<Model> d = storage.load(container);
-            	model = d.decrypt().verifyCheckSum().deserialize();
+				if (d.getBytes().length == 0) {
+					// case of an empty / non existing file
+					model = new Model();
+				} else {
+					model = d.decrypt().verifyCheckSum().deserialize();
+				}
             	container.addComponent(model);
 			} catch (SerializerException e) {
                 reportError("Can't serialize passwords", e);
