@@ -1,14 +1,14 @@
 /**
- * Safe is a software managing your passwords in safe place.
+ * Safe Deposit Box is a software managing your passwords in safe place.
  *
  * Copyright (C) 2012 Fabien DUMINY (fduminy at jnode dot org)
  *
- * Safe is free software; you can redistribute it and/or
+ * Safe Deposit Box is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 3
  * of the License, or (at your option) any later version.
  *
- * Safe is distributed in the hope that it will be useful,
+ * Safe Deposit Box is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.

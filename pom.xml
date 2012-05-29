@@ -7,7 +7,7 @@
 	<artifactId>safe-pom</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Safe</name>
+	<name>Safe Deposit Box - Parent POM</name>
 
 	<url>http://gitorious.org/safe/pages/Home</url>
 
