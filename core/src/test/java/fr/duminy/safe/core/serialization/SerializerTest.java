@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.picocontainer.DefaultPicoContainer;
-import org.picocontainer.PicoContainer;
 
 import fr.duminy.safe.core.model.Model;
 
