@@ -62,23 +62,29 @@ public class DefaultStorage<T> implements Storage<T> {
     
     @Override
     public Data<T> load(PicoContainer container) throws StorageException {
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        
-        try {
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
+    	Data<T> result = null;
+    	        
+        if (file.exists() && (file.length() > 0)) {
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
             
-            byte[] buffer = new byte[(int) file.length()];
-            bis.read(buffer);
-            return new Data<T>(container, buffer);
-        } catch (FileNotFoundException e) {
-            throw new StorageException(e);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        } finally {
-            closeQuietly(bis);
-            closeQuietly(fis);
+	        try {
+	            fis = new FileInputStream(file);
+	            bis = new BufferedInputStream(fis);
+	            
+	            byte[] buffer = new byte[(int) file.length()];
+	            bis.read(buffer);
+	            result = new Data<T>(container, buffer);
+	        } catch (FileNotFoundException e) {
+	            throw new StorageException(e);
+	        } catch (IOException e) {
+	            throw new StorageException(e);
+	        } finally {
+	            closeQuietly(bis);
+	            closeQuietly(fis);
+	        }
         }
+        
+        return result;
     }
 }

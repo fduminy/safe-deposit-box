@@ -20,9 +20,11 @@
  */
 package fr.duminy.safe.core.storage;
 
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,5 +79,23 @@ public class StorageTest {
 		store();
 		byte[] result = storage.load(new DefaultPicoContainer()).getBytes();
 		assertArrayEquals("input data must be unchanged after store followed by load", DATA, result);
+	}    
+    
+	@Test
+	public void testLoadNonExistingFile() throws StorageException {
+		if (file.exists()) {
+			file.delete();
+		}
+		assertFalse("file must not exist", file.exists());
+		Data<TestClass> result = storage.load(new DefaultPicoContainer());
+		assertNull("Storage.load must return null for non existing file", result);
+	}    
+    
+	@Test
+	public void testLoadEmptyFile() throws StorageException {
+		assertTrue("file must exist", file.exists());
+		assertTrue("file must be empty", (file.length() == 0));
+		Data<TestClass> result = storage.load(new DefaultPicoContainer());
+		assertNull("Storage.load must return null for an empty file", result);
 	}    
 }

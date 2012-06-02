@@ -101,11 +101,11 @@ abstract public class Core {
 		Storage<Model> storage = container.getComponent(Storage.class);
 		try {
 			Data<Model> d = storage.load(container);
-			if (d.getBytes().length == 0) {
+			if (d != null) {
+				model = d.decrypt().verifyCheckSum().deserialize();
+			} else {
 				// case of an empty / non existing file
 				model = new Model();
-			} else {
-				model = d.decrypt().verifyCheckSum().deserialize();
 			}
         	container.addComponent(model);
 		} catch (SerializerException e) {
