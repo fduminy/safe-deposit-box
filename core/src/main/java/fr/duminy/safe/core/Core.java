@@ -99,28 +99,24 @@ abstract public class Core {
         
         @SuppressWarnings("unchecked")
 		Storage<Model> storage = container.getComponent(Storage.class);
-        if (storage != null) {
-			try {
-				Data<Model> d = storage.load(container);
-				if (d.getBytes().length == 0) {
-					// case of an empty / non existing file
-					model = new Model();
-				} else {
-					model = d.decrypt().verifyCheckSum().deserialize();
-				}
-            	container.addComponent(model);
-			} catch (SerializerException e) {
-                reportError("Can't serialize passwords", e);
-			} catch (StorageException e) {
-                reportError("Can't store passwords", e);
-			} catch (CryptoProviderException e) {
-                reportError("Can't encrypt passwords", e);
-			} catch (ChecksumException e) {
-                reportError("Can't add checksum to passwords", e);
+		try {
+			Data<Model> d = storage.load(container);
+			if (d.getBytes().length == 0) {
+				// case of an empty / non existing file
+				model = new Model();
+			} else {
+				model = d.decrypt().verifyCheckSum().deserialize();
 			}
-        } else {
-            reportError("No serializer", null);
-        }
+        	container.addComponent(model);
+		} catch (SerializerException e) {
+            reportError("Can't serialize passwords", e);
+		} catch (StorageException e) {
+            reportError("Can't store passwords", e);
+		} catch (CryptoProviderException e) {
+            reportError("Can't encrypt passwords", e);
+		} catch (ChecksumException e) {
+            reportError("Can't add checksum to passwords", e);
+		}
     }
     
     public void storeModel() {
