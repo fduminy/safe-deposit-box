@@ -20,30 +20,13 @@
  */
 package fr.duminy.safe.core;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+@SuppressWarnings("serial")
+public class WrongSizeException extends Exception {
+    public WrongSizeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-public class TestUtils {
-    private TestUtils() {        
-    }
-        
-    public static void assertArrayNotEquals(String message, byte[] expected,
-            byte[] actual) {
-        boolean equal;
-        try {
-            assertArrayEquals(message, expected, actual);
-            equal = true;
-        } catch (AssertionError e) {
-            equal = false;
-        }
-        assertTrue(message, !equal);
-    }
-    
-    public static byte[] createTestData(int size) {
-        byte[] data = new byte[size];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) i;
-        }
-        return data;
+    public WrongSizeException(String message) {
+        super(message);
     }
 }

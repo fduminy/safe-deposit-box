@@ -24,66 +24,52 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import fr.duminy.safe.core.Data;
+import fr.duminy.safe.core.WrongSizeException;
 
 public class DefaultChecksum<T> implements Checksum<T> {
-
+	private static Logger LOG = LoggerFactory.getLogger(DefaultChecksum.class);
+	
     @Override
     public Data<T> verifyCheckSum(Data<T> data) throws ChecksumException {
-        // read size of checksum
-        ByteBuffer buffer = ByteBuffer.wrap(data.getBytes());
-        int checksumSize = buffer.getInt();
-        if (buffer.remaining() < checksumSize) {
-            throw new WrongChecksumException("checksumSize is too big");
-        }
-        if (checksumSize <= 0) {
-            throw new WrongChecksumException("checksumSize <= 0");
-        }
-
         // read checksum
-        byte[] checksum = new byte[checksumSize];
-        buffer.get(checksum);
-        
-        // compute checksum
-        buffer.mark();
-        byte[] sha1 = computeChecksum(buffer);
-        
-        // verify checksum
-        if (sha1.length != checksum.length) {
-            throw new WrongChecksumException("actual checksum has wrong length");
-        }
-        
-        for (int i = 0; i < sha1.length; i++) {
-            if (sha1[i] != checksum[i]) {
-                throw new WrongChecksumException("wrong checksum");    
-            }
-        }
-        
-        buffer.reset();
-        byte[] buf = new byte[buffer.remaining()];
-        buffer.get(buf);
-        return new Data<T>(data.getContainer(), buf);
+    	try {
+	        Data<T> checksum = data.readBlock();
+	        Data<T> actualData = data.readBlockAfter(checksum, 0);
+	        
+	        // compute checksum
+	        byte[] sha1 = computeChecksum(ByteBuffer.wrap(actualData.getBytes()));
+	        
+	        // verify checksum
+	        if (sha1.length != checksum.getSize()) {
+	            throw new WrongChecksumException("actual checksum has wrong length");
+	        }
+	        
+	        for (int i = 0; i < sha1.length; i++) {
+	            if (sha1[i] != checksum.get(i)) {
+	                throw new WrongChecksumException("wrong checksum");
+	            }
+	        }
+
+	        return actualData;
+    	} catch (WrongSizeException e) {
+    		throw new WrongChecksumException(e.getMessage(), e);
+    	}
     }
 
     @Override
     public Data<T> addCheckSum(Data<T> data) throws ChecksumException {
+    	LOG.debug("addCheckSum: data: {}", data);
+        
         // compute checksum
         ByteBuffer buffer = ByteBuffer.wrap(data.getBytes());
-        buffer.mark();
         byte[] sha1 = computeChecksum(buffer);
-        buffer.reset();
-        
-        // write size of checksum
-        ByteBuffer result = ByteBuffer.allocate(4 + sha1.length + buffer.remaining()); // size of int = 4
-        result.putInt(sha1.length);
 
-        // write checksum
-        result.put(sha1);
-        
-        // write data
-        result.put(buffer);
-        
-        return new Data<T>(data.getContainer(), result.array());
+        return Data.appendBlocks(sha1, data);        
+
     }
 
     private byte[] computeChecksum(ByteBuffer buffer)
@@ -96,6 +82,10 @@ public class DefaultChecksum<T> implements Checksum<T> {
         }
         byte[] d = new byte[buffer.remaining()];
         buffer.get(d);
+        if (LOG.isDebugEnabled()) {
+        	LOG.debug("computeChecksum: buffer: {}", Data.toString(d, 8));
+        }
+        
         byte[] sha1 = md.digest(d);
         return sha1;
     }

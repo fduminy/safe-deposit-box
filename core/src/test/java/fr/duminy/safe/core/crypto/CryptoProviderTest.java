@@ -101,8 +101,7 @@ public class CryptoProviderTest {
         assertNotNull(output);
         assertTrue("output length must be > 0", output.getBytes().length > 0);
         assertArrayNotEquals("output must not be same as input", data.getBytes(), output.getBytes());
-        LOG.info((encrypt ? "encrypt" : "decrypt") + ": in={}\nout={}", 
-                TestUtils.toString(data.getBytes()), TestUtils.toString(output.getBytes()));
+        LOG.info((encrypt ? "encrypt" : "decrypt") + ": in={}\nout={}", data, output);
         
         return output;
     }
