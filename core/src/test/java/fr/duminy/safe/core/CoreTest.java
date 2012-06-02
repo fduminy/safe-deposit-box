@@ -21,9 +21,11 @@
 package fr.duminy.safe.core;
 
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,6 +84,7 @@ public class CoreTest {
 	@Test
 	public void testDisplayError() {
 		core.displayError("error", new Exception("error"));
+		core.assertDisplayErrorCalled();
 	}
 
 	@Test
@@ -106,6 +109,8 @@ public class CoreTest {
 	}
 
 	public class FakeCore extends Core {
+		private boolean displayErrorCalled = false;
+		
 		public FakeCore() {
 			super();
 		}
@@ -121,9 +126,14 @@ public class CoreTest {
 		
 		@Override
 		protected void displayError(String message, Exception e) {
-			// TODO Auto-generated method stub
-			
+			displayErrorCalled = true;
 		}	
+		
+		public void assertDisplayErrorCalled() {
+			if (!displayErrorCalled) {
+				fail("displayError not called");
+			}
+		}
 		
 		@Override
 		protected File getPasswordFile() {
