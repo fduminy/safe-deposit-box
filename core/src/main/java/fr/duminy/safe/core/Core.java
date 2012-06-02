@@ -52,12 +52,12 @@ abstract public class Core {
         
     private final MutablePicoContainer container;
     
-    public Core() throws Exception {
+    public Core() {
         container = new DefaultPicoContainer(new Caching());
         init(container);
     }
     
-    protected void init(MutablePicoContainer container) throws Exception {
+    protected void init(MutablePicoContainer container) {
         container.addComponent(new DefaultStorage<Model>(getPasswordFile()));
         
         container.addComponent(Model.class);
@@ -70,7 +70,7 @@ abstract public class Core {
     	return new File(home, "passwords.safe");
     }
     
-    public final void start() {
+    public final void start() throws CoreException {        
         loadModel();
         
         final System system = container.getComponent(System.class);
@@ -93,7 +93,7 @@ abstract public class Core {
         });
     }
 
-    public void loadModel() {    	
+    public final void loadModel() throws CoreException {    	
         Model model = container.getComponent(Model.class);
         container.removeComponentByInstance(model);
         
@@ -109,17 +109,17 @@ abstract public class Core {
 			}
         	container.addComponent(model);
 		} catch (SerializerException e) {
-            reportError("Can't serialize passwords", e);
+            throw new CoreException("Can't serialize passwords", e);
 		} catch (StorageException e) {
-            reportError("Can't store passwords", e);
+			throw new CoreException("Can't store passwords", e);
 		} catch (CryptoProviderException e) {
-            reportError("Can't encrypt passwords", e);
+			throw new CoreException("Can't encrypt passwords", e);
 		} catch (ChecksumException e) {
-            reportError("Can't add checksum to passwords", e);
+			throw new CoreException("Can't add checksum to passwords", e);
 		}
     }
     
-    public void storeModel() {
+    public final void storeModel() throws CoreException {
         Model model = container.getComponent(Model.class);
         if (model != null) {
         	
@@ -130,13 +130,13 @@ abstract public class Core {
 					Data<Model> d = serializer.serialize(container, model);
 	            	d.addCheckSum().encrypt().save();
 				} catch (SerializerException e) {
-	                reportError("Can't serialize passwords", e);
+					throw new CoreException("Can't serialize passwords", e);
 				} catch (StorageException e) {
-	                reportError("Can't store passwords", e);
+					throw new CoreException("Can't store passwords", e);
 				} catch (CryptoProviderException e) {
-	                reportError("Can't encrypt passwords", e);
+					throw new CoreException("Can't encrypt passwords", e);
 				} catch (ChecksumException e) {
-	                reportError("Can't add checksum to passwords", e);
+					throw new CoreException("Can't add checksum to passwords", e);
 				}
             } else {
                 reportError("No serializer", null);
@@ -154,7 +154,7 @@ abstract public class Core {
     
     abstract protected void displayError(String message, Exception e);
     
-    public void stop() throws StorageException {
+    public void stop() throws CoreException {
         storeModel();
     }
 
@@ -169,7 +169,7 @@ abstract public class Core {
     }
     
     @Override
-    protected void finalize() throws StorageException {
+    protected void finalize() throws CoreException {
         stop();
     }    
     

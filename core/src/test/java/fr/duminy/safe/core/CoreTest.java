@@ -35,7 +35,6 @@ import org.junit.Test;
 import org.picocontainer.MutablePicoContainer;
 
 import fr.duminy.safe.core.model.Password;
-import fr.duminy.safe.core.storage.StorageException;
 import fr.duminy.safe.core.system.ClipboardListener;
 import fr.duminy.safe.core.system.PasswordListener;
 import fr.duminy.safe.core.system.System;
@@ -61,17 +60,17 @@ public class CoreTest {
     }
 	
 	@Test
-	public void testStart() {
+	public void testStart() throws CoreException {
 		core.start();
 	}
 
 	@Test
-	public void testLoadModel() {
+	public void testLoadModel() throws CoreException {
 		core.loadModel();
 	}
 
 	@Test
-	public void testStoreModel() {
+	public void testStoreModel() throws CoreException {
 		core.storeModel();
 	}
 
@@ -86,7 +85,7 @@ public class CoreTest {
 	}
 
 	@Test
-	public void testStop() throws StorageException {
+	public void testStop() throws CoreException {
 		core.stop();
 	}
 
@@ -107,12 +106,12 @@ public class CoreTest {
 	}
 
 	public class FakeCore extends Core {
-		public FakeCore() throws Exception {
+		public FakeCore() {
 			super();
 		}
 
 	    @Override
-	    protected void init(MutablePicoContainer container) throws Exception {
+	    protected void init(MutablePicoContainer container) {
 	        super.init(container);
 	        
 	        container.addComponent(FakeSystem.class);

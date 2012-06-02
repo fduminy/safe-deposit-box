@@ -38,7 +38,7 @@ public class SwingCore extends Core {
     }
 
     @Override
-    protected void init(MutablePicoContainer container) throws Exception {
+    protected void init(MutablePicoContainer container) {
         super.init(container);
         
         container.addComponent(SwingSystem.class);
