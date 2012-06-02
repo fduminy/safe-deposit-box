@@ -50,8 +50,6 @@ import fr.duminy.safe.core.system.UserActionListener;
 abstract public class Core {
     private static final Logger LOG = LoggerFactory.getLogger(Core.class);
         
-    private static final boolean DEBUG = true;
-    
     private final MutablePicoContainer container;
     
     public Core() throws Exception {
@@ -73,19 +71,6 @@ abstract public class Core {
     }
     
     public final void start() {
-        if (DEBUG) {
-            for (int i = 0; i < 10; i++) {
-                Password p = new Password("" + i);
-                p.setPassword("password" + i);
-                addPassword(p);
-            }
-            
-            for (Password p : getPasswords()) {
-                LOG.debug("passwords={}", p);
-            }
-            storeModel();
-        }
-        
         loadModel();
         
         final System system = container.getComponent(System.class);
@@ -93,10 +78,6 @@ abstract public class Core {
         timer.setAction(new Runnable() {
             @Override
             public void run() {
-                if (DEBUG) {
-                    return;
-                }
-                
                 system.lockScreen();
             }
         });
