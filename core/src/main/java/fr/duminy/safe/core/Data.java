@@ -122,8 +122,25 @@ public class Data<T> {
 		return readBlock(blockPosition + INT_SIZE + block.getSize(), true);
 	}
 
+	public int readSize(int position) {
+		return toByteBuffer(position).getInt();
+	}
+
+	public byte[] readBlockAfterSize(int position) {
+		ByteBuffer buffer = toByteBuffer(position);
+		buffer.getInt();
+		
+		// read block
+		byte[] block = new byte[buffer.remaining()];
+		buffer.get(block);
+		return block;
+	}
+	
+	private ByteBuffer toByteBuffer(int position) {
+		return (position == 0) ? ByteBuffer.wrap(data) : ByteBuffer.wrap(data, position, data.length - position);
+	}
 	private Data<T> readBlock(int position, boolean untilEnd) throws WrongSizeException {
-		ByteBuffer buffer = (position == 0) ? ByteBuffer.wrap(data) : ByteBuffer.wrap(data, position, data.length - position);
+		ByteBuffer buffer = toByteBuffer(position);
 		int sizeToRead = buffer.remaining(); 
 		if (!untilEnd) {
 			// read size
@@ -132,8 +149,8 @@ public class Data<T> {
 				throw new WrongSizeException("size is too big (0x"
 						+ Integer.toHexString(sizeToRead) + ")");
 			}
-			if (sizeToRead <= 0) {
-				throw new WrongSizeException("size <= 0");
+			if (sizeToRead < 0) {
+				throw new WrongSizeException("size < 0");
 			}
 		}
 		

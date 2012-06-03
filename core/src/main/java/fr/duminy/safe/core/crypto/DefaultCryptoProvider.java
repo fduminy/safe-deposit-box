@@ -25,6 +25,9 @@ import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.BlockCipherPadding;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.paddings.ZeroBytePadding;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import fr.duminy.safe.core.Data;
@@ -52,26 +55,55 @@ public class DefaultCryptoProvider<T> implements CryptoProvider<T> {
         return processBytes(false, input);
     }
     
-    private final Data<T> processBytes(boolean encrypt, Data<T> input)
-            throws CryptoProviderException {
-        BlockCipher engine = new DESEngine();
-        BufferedBlockCipher cipher = new BufferedBlockCipher(
-                new CBCBlockCipher(engine));
+	private final Data<T> processBytes(boolean encrypt, Data<T> input)
+			throws CryptoProviderException {
+		final byte[] inputBytes;
+		final int size;
+		if (encrypt) {
+			inputBytes = input.getBytes();
+			size = inputBytes.length;
+		} else {
+			size = input.readSize(0);
+			if (size == 0) {
+				return new Data<T>(input.getContainer(), new byte[0]);
+			}
 
-        cipher.init(encrypt, new KeyParameter(key.getBytes()));
+			inputBytes = input.readBlockAfterSize(0);
+		}
 
-        int inputLength = input.getBytes().length; 
-        byte[] output = new byte[cipher.getOutputSize(inputLength)];
+		byte[] output = processBytes(encrypt, inputBytes, size);
 
-        int outputLen = cipher.processBytes(input.getBytes(), 0, inputLength, output,
-                0);
-        try {
-            cipher.doFinal(output, outputLen);
-        } catch (CryptoException ce) {
-            throw new CryptoProviderException("Error while "
-                    + (encrypt ? "encrypting" : "decrypting"), ce);
-        }
-        
-        return new Data<T>(input.getContainer(), output);
-    }
+		Data<T> result;		
+		if (encrypt) {
+			result = Data.writeIntAndBlock(input.getContainer(), size,
+					output);
+		} else {
+			result = new Data<T>(input.getContainer(), output);
+		}
+
+		return result;
+	}
+    
+	private final byte[] processBytes(boolean encrypt, byte[] input, int size)
+			throws CryptoProviderException {
+		BlockCipherPadding blockCipherPadding = new ZeroBytePadding();
+
+		BlockCipher engine = new DESEngine();
+		BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(
+				new CBCBlockCipher(engine), blockCipherPadding);
+
+		cipher.init(encrypt, new KeyParameter(key.getBytes()));
+
+		byte[] output = new byte[encrypt ? cipher.getOutputSize(size) : size];
+
+		int outputLen = cipher.processBytes(input, 0, input.length, output, 0);
+		try {
+			cipher.doFinal(output, outputLen);
+		} catch (CryptoException ce) {
+			throw new CryptoProviderException("Error while "
+					+ (encrypt ? "encrypting" : "decrypting"), ce);
+		}
+
+		return output;
+	}
 }
