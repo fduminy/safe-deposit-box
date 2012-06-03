@@ -24,7 +24,6 @@ package fr.duminy.safe.core.crypto;
 import static fr.duminy.safe.core.TestUtils.assertArrayNotEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
