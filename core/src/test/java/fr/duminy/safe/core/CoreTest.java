@@ -35,8 +35,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.picocontainer.MutablePicoContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import fr.duminy.safe.core.checksum.ChecksumException;
+import fr.duminy.safe.core.crypto.CryptoProviderException;
+import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
+import fr.duminy.safe.core.serialization.SerializerException;
+import fr.duminy.safe.core.storage.StorageException;
 import fr.duminy.safe.core.system.ClipboardListener;
 import fr.duminy.safe.core.system.PasswordListener;
 import fr.duminy.safe.core.system.System;
@@ -109,6 +116,8 @@ public class CoreTest {
 	}
 
 	public class FakeCore extends Core {
+		private Logger LOG = LoggerFactory.getLogger(FakeCore.class);
+		
 		private boolean displayErrorCalled = false;
 		
 		public FakeCore() {
@@ -139,6 +148,57 @@ public class CoreTest {
 		protected File getPasswordFile() {
 			return file;
 		}
+		
+	    @Override
+	    protected Data<Model> load() throws StorageException {
+	    	Data<Model> result = super.load();
+	    	LOG.debug("load: \noutput={}", result);
+	        return result;
+	    }
+	    
+	    @Override
+	    protected Data<Model> decrypt(Data<Model> input) throws CryptoProviderException {
+	    	Data<Model> result = super.decrypt(input);
+	    	LOG.debug("decrypt: \ninput ={}\noutput={}", input, result);
+	        return result;
+	    }
+
+	    @Override
+	    protected Data<Model> verifyCheckSum(Data<Model> input) throws ChecksumException {
+	    	Data<Model> result = super.verifyCheckSum(input);
+	    	LOG.debug("verifyCheckSum: \ninput ={}\noutput={}", input, result);
+	        return result;
+	    }
+
+	    @Override
+	    protected Model deserialize(Data<Model> input) throws SerializerException {
+	    	Model result = super.deserialize(input);
+	    	LOG.debug("deserialize: \ninput ={}\noutput={}", input, result);
+	        return result;
+	    }		
+	    
+	    protected Data<Model> serialize(Model input) throws SerializerException {
+	    	Data<Model> result = super.serialize(input);
+	    	LOG.debug("serialize: \ninput ={}\noutput={}", input, result);
+	        return result;
+	    }
+
+	    protected Data<Model> addCheckSum(Data<Model> input) throws ChecksumException {
+	    	Data<Model> result = super.addCheckSum(input);
+	    	LOG.debug("addCheckSum: \ninput ={}\noutput={}", input.toString(), result.toString());
+	        return result;
+	    }
+
+	    protected Data<Model> encrypt(Data<Model> input) throws CryptoProviderException {
+	    	Data<Model> result = super.encrypt(input);
+	    	LOG.debug("encrypt: \ninput ={}\noutput={}", input, result);
+	        return result;
+	    }
+
+	    protected void store(Data<Model> input) throws StorageException {
+	    	super.store(input);
+	    	LOG.debug("store: \ninput ={}", input);
+	    }
 	}
 	
 	public static class FakeSystem implements System {

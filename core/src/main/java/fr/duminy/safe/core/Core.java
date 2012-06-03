@@ -29,8 +29,10 @@ import org.picocontainer.behaviors.Caching;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.duminy.safe.core.checksum.Checksum;
 import fr.duminy.safe.core.checksum.ChecksumException;
 import fr.duminy.safe.core.checksum.DefaultChecksum;
+import fr.duminy.safe.core.crypto.CryptoProvider;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
 import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
 import fr.duminy.safe.core.model.DuplicateNameException;
@@ -72,7 +74,7 @@ abstract public class Core {
     	return new File(home, "passwords.safe");
     }
     
-    public final void start() throws CoreException {        
+    public final void start() throws CoreException {
         loadModel();
         
         final System system = container.getComponent(System.class);
@@ -99,48 +101,82 @@ abstract public class Core {
         Model model = container.getComponent(Model.class);
         container.removeComponentByInstance(model);
         
+    	try {            
+    		Data<Model> d = load();
+    		if (d != null) {
+	    		d = decrypt(d);
+	    		d = verifyCheckSum(d);
+	    		model = deserialize(d);
+    		} else {
+    			model = new Model();
+    		}
+		} catch (Exception e) {
+			throw new CoreException("can't load passwords", e);
+		}
+		
+    	container.addComponent(model);
+    }
+
+    protected Data<Model> load() throws StorageException {
         @SuppressWarnings("unchecked")
 		Storage<Model> storage = container.getComponent(Storage.class);
-		try {
-			Data<Model> d = storage.load(container);
-			if (d != null) {
-				model = d.decrypt().verifyCheckSum().deserialize();
-			} else {
-				// case of an empty / non existing file
-				model = new Model();
-			}
-        	container.addComponent(model);
-		} catch (SerializerException e) {
-            throw new CoreException("Can't serialize passwords", e);
-		} catch (StorageException e) {
-			throw new CoreException("Can't store passwords", e);
-		} catch (CryptoProviderException e) {
-			throw new CoreException("Can't encrypt passwords", e);
-		} catch (ChecksumException e) {
-			throw new CoreException("Can't add checksum to passwords", e);
-		}
+        return storage.load(container);
+    }
+    
+    protected Data<Model> decrypt(Data<Model> input) throws CryptoProviderException {
+        @SuppressWarnings("unchecked")
+        CryptoProvider<Model> crypto = container.getComponent(CryptoProvider.class);
+		return crypto.decrypt(input);
+    }
+
+    protected Data<Model> verifyCheckSum(Data<Model> input) throws ChecksumException {
+        @SuppressWarnings("unchecked")
+        Checksum<Model> checksum = container.getComponent(Checksum.class);
+		return checksum.verifyCheckSum(input);
+    }
+
+    protected Model deserialize(Data<Model> input) throws SerializerException {
+        @SuppressWarnings("unchecked")
+        Serializer<Model> serializer = container.getComponent(Serializer.class);
+		return serializer.deserialize(input);
     }
     
     public final void storeModel() throws CoreException {
-        Model model = container.getComponent(Model.class);
-        if (model != null) {        	
-        	@SuppressWarnings("unchecked")
-    		Serializer<Model> serializer = container.getComponent(Serializer.class);
-			try {
-				Data<Model> d = serializer.serialize(container, model);
-            	d.addCheckSum().encrypt().save();
-			} catch (SerializerException e) {
-				throw new CoreException("Can't serialize passwords", e);
-			} catch (StorageException e) {
-				throw new CoreException("Can't store passwords", e);
-			} catch (CryptoProviderException e) {
-				throw new CoreException("Can't encrypt passwords", e);
-			} catch (ChecksumException e) {
-				throw new CoreException("Can't add checksum to passwords", e);
-			}
-        }
+    	Model model = container.getComponent(Model.class);
+    	try {
+			Data<Model> d = serialize(model);
+			d = addCheckSum(d);
+			d = encrypt(d);
+			store(d);
+		} catch (Exception e) {
+			throw new CoreException("can't store passwords", e);
+		}
     }
 
+    protected Data<Model> serialize(Model input) throws SerializerException {
+		@SuppressWarnings("unchecked")
+		Serializer<Model> serializer = container.getComponent(Serializer.class);
+		return serializer.serialize(container, input);
+    }
+
+    protected Data<Model> addCheckSum(Data<Model> input) throws ChecksumException {
+		@SuppressWarnings("unchecked")
+		Checksum<Model> checksum = container.getComponent(Checksum.class);
+		return checksum.addCheckSum(input);
+    }
+
+    protected Data<Model> encrypt(Data<Model> input) throws CryptoProviderException {
+		@SuppressWarnings("unchecked")
+		CryptoProvider<Model> crypto = container.getComponent(CryptoProvider.class);
+		return crypto.encrypt(input);
+    }
+
+    protected void store(Data<Model> input) throws StorageException {
+		@SuppressWarnings("unchecked")
+		Storage<Model> storage = container.getComponent(Storage.class);
+    	storage.store(input);
+    }
+    
     protected final void reportError(String message, Exception e) {
         if (message == null) {
             message = (e == null) ? null : e.getMessage();
