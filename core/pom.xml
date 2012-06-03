@@ -37,4 +37,36 @@
   		<artifactId>bcprov-jdk16</artifactId>
   	</dependency>
   </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<configuration>
+					<targetClasses>
+						<param>fr.duminy.safe.*</param>
+					</targetClasses>
+					<targetTests>
+						<param>fr.duminy.safe.*</param>
+					</targetTests>
+					<mutators>
+						<mutator>ALL</mutator>
+					</mutators>
+				    <threads>4</threads>
+					<mutateStaticInitializers>true</mutateStaticInitializers>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>test-mutation-coverage</id>
+						<phase>test</phase>
+						<goals>
+							<goal>mutationCoverage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>  
 </project>
