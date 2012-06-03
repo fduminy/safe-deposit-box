@@ -36,6 +36,7 @@ import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
 import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
+import fr.duminy.safe.core.serialization.DefaultSerializer;
 import fr.duminy.safe.core.serialization.Serializer;
 import fr.duminy.safe.core.serialization.SerializerException;
 import fr.duminy.safe.core.storage.DefaultStorage;
@@ -63,6 +64,7 @@ abstract public class Core {
         container.addComponent(Model.class);
         container.addComponent(DefaultCryptoProvider.class);
         container.addComponent(DefaultChecksum.class);
+        container.addComponent(DefaultSerializer.class);
     }
     
     protected File getPasswordFile() {
@@ -121,26 +123,21 @@ abstract public class Core {
     
     public final void storeModel() throws CoreException {
         Model model = container.getComponent(Model.class);
-        if (model != null) {
-        	
+        if (model != null) {        	
         	@SuppressWarnings("unchecked")
     		Serializer<Model> serializer = container.getComponent(Serializer.class);
-            if (serializer != null) {
-				try {
-					Data<Model> d = serializer.serialize(container, model);
-	            	d.addCheckSum().encrypt().save();
-				} catch (SerializerException e) {
-					throw new CoreException("Can't serialize passwords", e);
-				} catch (StorageException e) {
-					throw new CoreException("Can't store passwords", e);
-				} catch (CryptoProviderException e) {
-					throw new CoreException("Can't encrypt passwords", e);
-				} catch (ChecksumException e) {
-					throw new CoreException("Can't add checksum to passwords", e);
-				}
-            } else {
-                reportError("No serializer", null);
-            }
+			try {
+				Data<Model> d = serializer.serialize(container, model);
+            	d.addCheckSum().encrypt().save();
+			} catch (SerializerException e) {
+				throw new CoreException("Can't serialize passwords", e);
+			} catch (StorageException e) {
+				throw new CoreException("Can't store passwords", e);
+			} catch (CryptoProviderException e) {
+				throw new CoreException("Can't encrypt passwords", e);
+			} catch (ChecksumException e) {
+				throw new CoreException("Can't add checksum to passwords", e);
+			}
         }
     }
 
