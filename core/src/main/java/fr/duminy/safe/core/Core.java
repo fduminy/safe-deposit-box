@@ -45,6 +45,7 @@ import fr.duminy.safe.core.storage.DefaultStorage;
 import fr.duminy.safe.core.storage.Storage;
 import fr.duminy.safe.core.storage.StorageException;
 import fr.duminy.safe.core.system.ClipboardListener;
+import fr.duminy.safe.core.system.NullTimer;
 import fr.duminy.safe.core.system.PasswordListener;
 import fr.duminy.safe.core.system.System;
 import fr.duminy.safe.core.system.Timer;
@@ -78,7 +79,14 @@ abstract public class Core {
         loadModel();
         
         final System system = container.getComponent(System.class);
-        final Timer timer = system.createTimer(1000);
+        final Timer t = system.createTimer(1000);
+        final Timer timer;
+        if (t == null) {
+        	LOG.warn("{} returned a null timer. Using NullTimer.", system);
+        	timer = NullTimer.INSTANCE;
+        } else {
+        	timer = t;
+        }
         timer.setAction(new Runnable() {
             @Override
             public void run() {
@@ -194,6 +202,11 @@ abstract public class Core {
     public void addPassword(Password password) throws DuplicateNameException {
         Model model = container.getComponent(Model.class);
         model.addPassword(password);
+    }
+
+    public void removePassword(Password password) throws DuplicateNameException {
+        Model model = container.getComponent(Model.class);
+        model.removePassword(password);
     }
     
     public List<Password> getPasswords() {

@@ -37,10 +37,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+    <parent>
+        <groupId>net.codjo.pom</groupId>
+        <artifactId>codjo-pom-application</artifactId>
+        <version>2.20</version>
+    </parent>
+    
 	<modules>
 		<module>core</module>
 		<module>swing</module>
 		<module>android</module>
+		<module>release-test</module>
 	</modules>
 
 	<dependencyManagement>
@@ -71,6 +78,13 @@
 		  		<artifactId>bcprov-jdk16</artifactId>
 		  		<version>1.46</version>
 		  	</dependency>		  	
+		  	
+		  	<!-- FIXME workaround because dumbster:dumbster:1.6-agi is not (yet) on codjo's repository -->
+            <dependency>
+                <groupId>dumbster</groupId>
+                <artifactId>dumbster</artifactId>
+                <version>1.6</version>
+            </dependency>           		  	
 		</dependencies>
 	</dependencyManagement>
 

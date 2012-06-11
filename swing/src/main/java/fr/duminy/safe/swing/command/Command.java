@@ -18,31 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.swing.command;
 
-import java.io.Serializable;
+import fr.duminy.safe.swing.action.Action;
 
-
-public class Password extends Named implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7853775945883397991L;
-    
-    private final String password;
-
-    public Password(String name, String password) {
-        super(name);
-        this.password = password;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String toString() {
-        return "Password [password=" + password + ", getName()=" + getName()
-                + "]";
-    }
+abstract public class Command {
+	private final Action action;
+	
+	public Command(Action action) {
+		this.action = action;
+	}
+	
+	public final String getName() {
+		return action.getName();
+	}
+	
+	abstract public void run();
+	
+	@Override
+	public String toString() {
+		return "Command[" + getName() + "]";
+	}
 }

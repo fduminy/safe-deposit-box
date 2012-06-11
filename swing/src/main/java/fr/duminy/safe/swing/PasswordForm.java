@@ -20,120 +20,79 @@
  */
 package fr.duminy.safe.swing;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import static fr.duminy.safe.swing.FormState.CREATE;
+import static fr.duminy.safe.swing.FormState.READ;
+import static fr.duminy.safe.swing.action.Action.CANCEL_EDITION;
+import static fr.duminy.safe.swing.action.Action.CREATE_PASSWORD;
 
-import javax.swing.JLabel;
+import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
-import org.jdesktop.beansbinding.AutoBinding;
-import org.jdesktop.beansbinding.BeanProperty;
-import org.jdesktop.beansbinding.BindingGroup;
-import org.jdesktop.beansbinding.Bindings;
+import org.jdesktop.swingx.action.Targetable;
 
-public class PasswordForm extends JPanel {
+import fr.duminy.safe.core.model.Password;
+import fr.duminy.safe.swing.command.Command;
+import fr.duminy.safe.swing.command.CommandSupport;
 
-    private BindingGroup m_bindingGroup;
-    private fr.duminy.safe.core.model.Password password;
-    private JTextField nameJTextField;
-    private JTextField passwordJTextField;
+public class PasswordForm extends JPanel implements Targetable {
+	private final CommandSupport support = new CommandSupport();	
+	
+	private final PasswordFormButtons passwordFormButtons;
+	private final PasswordFormFields passwordFormFields;
+	private FormState state = READ;
+	
+	public PasswordForm() {
+		setLayout(new BorderLayout(0, 0));
+		
+		passwordFormButtons = new PasswordFormButtons();
+		add(passwordFormButtons, BorderLayout.SOUTH);
+		
+		passwordFormFields = new PasswordFormFields();
+		add(passwordFormFields, BorderLayout.CENTER);
+				
+		support.addCommand(new Command(CREATE_PASSWORD) {
+			public void run() {
+				changeState(CREATE, new Password("", ""));
+			}
+		});
+		support.addCommand(new Command(CANCEL_EDITION) {
+			public void run() {
+				changeState(READ, null);
+			}
+		});
+		
+		changeState(READ, null);
+	}
 
-    public PasswordForm(fr.duminy.safe.core.model.Password newPassword) {
-        this();
-        setPassword(newPassword);
-    }
+	public void viewPassword(Password password) {
+		changeState(READ, password);
+	}
 
-    public PasswordForm() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
-        gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
-        gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 1.0E-4 };
-        gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 1.0E-4 };
-        setLayout(gridBagLayout);
+	public Password getPassword() {
+		return passwordFormFields.getPassword();
+	}
 
-        JLabel nameLabel = new JLabel("Name:");
-        GridBagConstraints labelGbc_0 = new GridBagConstraints();
-        labelGbc_0.insets = new Insets(5, 5, 5, 5);
-        labelGbc_0.gridx = 0;
-        labelGbc_0.gridy = 0;
-        add(nameLabel, labelGbc_0);
-
-        nameJTextField = new JTextField();
-        GridBagConstraints componentGbc_0 = new GridBagConstraints();
-        componentGbc_0.insets = new Insets(5, 0, 5, 5);
-        componentGbc_0.fill = GridBagConstraints.HORIZONTAL;
-        componentGbc_0.gridx = 1;
-        componentGbc_0.gridy = 0;
-        add(nameJTextField, componentGbc_0);
-
-        JLabel passwordLabel = new JLabel("Password:");
-        GridBagConstraints labelGbc_1 = new GridBagConstraints();
-        labelGbc_1.insets = new Insets(5, 5, 5, 5);
-        labelGbc_1.gridx = 0;
-        labelGbc_1.gridy = 1;
-        add(passwordLabel, labelGbc_1);
-
-        passwordJTextField = new JTextField();
-        GridBagConstraints componentGbc_1 = new GridBagConstraints();
-        componentGbc_1.insets = new Insets(5, 0, 5, 5);
-        componentGbc_1.fill = GridBagConstraints.HORIZONTAL;
-        componentGbc_1.gridx = 1;
-        componentGbc_1.gridy = 1;
-        add(passwordJTextField, componentGbc_1);
-
-        if (password != null) {
-            m_bindingGroup = initDataBindings();
-        }
-    }
-
-    protected BindingGroup initDataBindings() {
-        BeanProperty<fr.duminy.safe.core.model.Password, java.lang.String> nameProperty = BeanProperty
-                .create("name");
-        BeanProperty<javax.swing.JTextField, java.lang.String> textProperty = BeanProperty
-                .create("text");
-        AutoBinding<fr.duminy.safe.core.model.Password, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding = Bindings
-                .createAutoBinding(AutoBinding.UpdateStrategy.READ, password,
-                        nameProperty, nameJTextField, textProperty);
-        autoBinding.bind();
-        //
-        BeanProperty<fr.duminy.safe.core.model.Password, java.lang.String> passwordProperty = BeanProperty
-                .create("password");
-        BeanProperty<javax.swing.JTextField, java.lang.String> textProperty_1 = BeanProperty
-                .create("text");
-        AutoBinding<fr.duminy.safe.core.model.Password, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding_1 = Bindings
-                .createAutoBinding(AutoBinding.UpdateStrategy.READ, password,
-                        passwordProperty, passwordJTextField, textProperty_1);
-        autoBinding_1.bind();
-        //
-        BindingGroup bindingGroup = new BindingGroup();
-        bindingGroup.addBinding(autoBinding);
-        bindingGroup.addBinding(autoBinding_1);
-        //
-        return bindingGroup;
-    }
-
-    public fr.duminy.safe.core.model.Password getPassword() {
-        return password;
-    }
-
-    public void setPassword(fr.duminy.safe.core.model.Password newPassword) {
-        setPassword(newPassword, true);
-    }
-
-    public void setPassword(fr.duminy.safe.core.model.Password newPassword,
-            boolean update) {
-        password = newPassword;
-        if (update) {
-            if (m_bindingGroup != null) {
-                m_bindingGroup.unbind();
-                m_bindingGroup = null;
-            }
-            if (password != null) {
-                m_bindingGroup = initDataBindings();
-            }
-        }
-    }
-
+	private void changeState(FormState state, Password password) {
+		this.state = state;
+		passwordFormButtons.changeState(state, password);
+		passwordFormFields.changeState(state, password);
+	}
+	
+	public boolean isEditing() {
+		return state.isEditing();
+	}
+	
+	@Override
+	public boolean doCommand(Object command, Object value) {
+		return support.doCommand(command, value);
+	}
+	@Override
+	public boolean hasCommand(Object command) {
+		return support.hasCommand(command);
+	}
+	@Override
+	public String[] getCommands() {
+		return support.getCommands();
+	}
 }

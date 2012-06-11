@@ -18,31 +18,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.core.system;
 
-import java.io.Serializable;
+public final class NullTimer implements Timer {
+	public static final Timer INSTANCE = new NullTimer();
+	
+	private NullTimer() {		
+	}
+	
+	@Override
+	public final void start() {
+	}
 
+	@Override
+	public final void stop() {
+	}
 
-public class Password extends Named implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7853775945883397991L;
-    
-    private final String password;
-
-    public Password(String name, String password) {
-        super(name);
-        this.password = password;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String toString() {
-        return "Password [password=" + password + ", getName()=" + getName()
-                + "]";
-    }
+	@Override
+	public final void setAction(Runnable runnable) {
+	}
 }

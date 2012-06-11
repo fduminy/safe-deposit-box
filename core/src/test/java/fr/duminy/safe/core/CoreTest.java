@@ -101,12 +101,25 @@ public class CoreTest {
 
 	@Test
 	public void testAddPassword() {
-		core.addPassword(new Password("test"));
+		core.addPassword(new Password("test", "test"));
 	}
 
 	@Test
+	public void testRemovePassword() {
+		Password p = new Password("test", "test");
+		core.addPassword(p);
+		List<Password> passwords = core.getPasswords();
+		assertEquals(1, passwords.size());
+		assertSame(p, passwords.get(0));
+		
+		core.removePassword(p);
+		passwords = core.getPasswords();
+		assertEquals(0, passwords.size());
+	}
+	
+	@Test
 	public void testGetPasswords() {
-		Password p = new Password("test");
+		Password p = new Password("test", "test");
 		core.addPassword(p);
 		
 		List<Password> passwords = core.getPasswords();

@@ -54,7 +54,8 @@ public class SwingSystem extends AbstractSystem<JComponent> {
      */
     @Override
     public Timer createTimer(int delay) {
-        return new SwingTimer(delay);
+//        return new SwingTimer(delay);
+    	return null;
     }
 
     /**

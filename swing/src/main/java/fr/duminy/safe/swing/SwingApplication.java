@@ -20,14 +20,14 @@
  */
 package fr.duminy.safe.swing;
 
-import java.io.IOException;
-
 import javax.swing.JComponent;
 import javax.swing.JMenuBar;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.View;
+
+import fr.duminy.safe.swing.action.Action;
 
 
 public class SwingApplication extends SingleFrameApplication {
@@ -42,6 +42,7 @@ public class SwingApplication extends SingleFrameApplication {
         super.initialize(args);
         try {
             core = new SwingCore();
+            
             core.start();            
         } catch (Exception e) {
             throw new Error(e);
@@ -64,24 +65,19 @@ public class SwingApplication extends SingleFrameApplication {
     
     @Override 
     protected void startup() {
+        Action.init();
+        
         View view = getMainView();
         view.setComponent(createMainComponent());
         view.setMenuBar(createMenuBar());
-        show(view);
+        show(view);        
     }
-
+    
     private JMenuBar createMenuBar() {
         return new JMenuBar();
     }
 
     private JComponent createMainComponent() {
-        PasswordList v;
-        try {
-            v = new PasswordList();
-            v.setPasswords(core.getPasswords());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return v;
+    	return new MainPanel(core);
     }
 }

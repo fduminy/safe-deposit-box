@@ -18,31 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.swing;
 
-import java.io.Serializable;
+import static fr.duminy.safe.swing.action.Action.ADD_PASSWORD;
+import static fr.duminy.safe.swing.action.Action.EDIT_PASSWORD;
+import static fr.duminy.safe.swing.action.Action.UPDATE_PASSWORD;
+import fr.duminy.safe.swing.action.Action;
 
-
-public class Password extends Named implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7853775945883397991L;
-    
-    private final String password;
-
-    public Password(String name, String password) {
-        super(name);
-        this.password = password;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String toString() {
-        return "Password [password=" + password + ", getName()=" + getName()
-                + "]";
-    }
+public enum FormState {
+	CREATE(true, ADD_PASSWORD),
+	READ(false, EDIT_PASSWORD),
+	UPDATE(true, UPDATE_PASSWORD);
+	
+	private final boolean editing;
+	private final Action mainAction;
+	
+	private FormState(boolean editing, Action mainAction) {
+		this.editing = editing;
+		this.mainAction = mainAction;
+	}
+	
+	public final boolean isEditing() {
+		return editing;
+	}
+	
+	public Action getMainAction() {
+		return mainAction;
+	}
 }
