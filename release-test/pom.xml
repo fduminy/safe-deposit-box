@@ -12,7 +12,7 @@
   
   <artifactId>safe-release-test</artifactId>
   <packaging>pom</packaging>
-  <name>Safe Deposit Box - Release Test</name>	
+  <name>${applicationName} - Release Test</name>	
   
   <properties>
       <project.root>${project.parent.basedir}</project.root>

@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>safe-swing</artifactId>
-  <name>Safe Deposit Box - Swing User Interface</name>
+  <name>${applicationName} - Swing User Interface</name>
   
   <properties>
       <project.root>${project.parent.basedir}</project.root>

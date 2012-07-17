@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>safe-android</artifactId>
-  <name>Safe Deposit Box - Android User Interface</name>
+  <name>${applicationName} - Android User Interface</name>
   
   <properties>
       <project.root>${project.parent.basedir}</project.root>

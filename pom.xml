@@ -7,9 +7,9 @@
 	<artifactId>safe-pom</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Safe Deposit Box - Parent POM</name>
-
-	<url>http://gitorious.org/safe/pages/Home</url>
+	<name>${applicationName} - Parent POM</name>
+	
+    <url>http://gitorious.org/safe/pages/Home</url>
 
 	<licenses>
 		<license>
@@ -35,6 +35,7 @@
 	<properties>
 		<project.root>${basedir}</project.root>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<applicationName>Safe Deposit Box</applicationName>
 	</properties>
 
     <parent>
@@ -84,7 +85,7 @@
                 <groupId>dumbster</groupId>
                 <artifactId>dumbster</artifactId>
                 <version>1.6</version>
-            </dependency>           		  	
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
