@@ -38,6 +38,7 @@ import org.jdesktop.swingx.action.Targetable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.command.Command;
 import fr.duminy.safe.swing.command.CommandSupport;
@@ -99,8 +100,12 @@ public class MainPanel extends JPanel implements Targetable {
 			public void run() {
 				Password password = passwordForm.getPassword();
 				LOG.info("{} {}", ADD_PASSWORD, password);
-				passwordForm.viewPassword(password);
-				passwordList.addPassword(password);
+				try {
+					passwordList.addPassword(password);
+					passwordForm.viewPassword(password);
+				} catch (DuplicateNameException dne) {
+					core.displayError(dne.getMessage(), dne);
+				}
 			}
 		});
 		support.addCommand(new Command(UPDATE_PASSWORD) {		
