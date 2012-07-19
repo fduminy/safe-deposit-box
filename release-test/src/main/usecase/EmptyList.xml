@@ -26,6 +26,8 @@
               xsi:noNamespaceSchemaLocation="http://test-release.xsd">
 
     <description>Check the state when the list is empty</description>
+    
+    <delete file="${user.home}/passwords.safe"/>
 
     <gui-test>
         <group name="Initial state">
