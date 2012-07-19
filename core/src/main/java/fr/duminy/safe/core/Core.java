@@ -35,6 +35,7 @@ import fr.duminy.safe.core.checksum.DefaultChecksum;
 import fr.duminy.safe.core.crypto.CryptoProvider;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
 import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
+import fr.duminy.safe.core.crypto.Key;
 import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
@@ -68,6 +69,16 @@ abstract public class Core {
         container.addComponent(DefaultCryptoProvider.class);
         container.addComponent(DefaultChecksum.class);
         container.addComponent(DefaultSerializer.class);
+        container.addComponent(getKey(container));
+    }
+    	    
+    protected Key getKey(MutablePicoContainer container) {
+    	Key result = container.getComponent(Key.class);
+    	if (result == null) {
+	    	byte[] key = new byte[]{1, 2, 3, 4, 5, 6, 7, 8}; //TODO get password from user
+	    	result = new Data<Object>(container, key);
+    	}
+    	return result;
     }
     
     protected File getPasswordFile() {

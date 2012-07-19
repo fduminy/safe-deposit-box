@@ -33,8 +33,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import fr.duminy.safe.core.Data;
 
 public class DefaultCryptoProvider<T> implements CryptoProvider<T> {
-	private final Data<?> key;
-    public DefaultCryptoProvider(Data<?> key) {
+	private final Key key;
+    public DefaultCryptoProvider(Key key) {
     	this.key = key;
     }
 

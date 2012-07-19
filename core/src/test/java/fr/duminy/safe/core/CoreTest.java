@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.duminy.safe.core.checksum.ChecksumException;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
+import fr.duminy.safe.core.crypto.Key;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.core.serialization.SerializerException;
@@ -142,8 +143,11 @@ public class CoreTest {
 	        super.init(container);
 	        
 	        container.addComponent(FakeSystem.class);
-	        
-	        container.addComponent(new Data<TestClass>(container, TestUtils.createTestData(8)));
+	    }
+
+	    @Override
+	    protected Key getKey(MutablePicoContainer container) {
+	    	return new Data<TestClass>(container, TestUtils.createTestData(8));
 	    }
 		
 		@Override

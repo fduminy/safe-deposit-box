@@ -29,12 +29,13 @@ import fr.duminy.safe.core.checksum.Checksum;
 import fr.duminy.safe.core.checksum.ChecksumException;
 import fr.duminy.safe.core.crypto.CryptoProvider;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
+import fr.duminy.safe.core.crypto.Key;
 import fr.duminy.safe.core.serialization.Serializer;
 import fr.duminy.safe.core.serialization.SerializerException;
 import fr.duminy.safe.core.storage.Storage;
 import fr.duminy.safe.core.storage.StorageException;
 
-public class Data<T> {
+public class Data<T> implements Key {
 	private static final int INT_SIZE = 4;
 	
 	private final byte[] data;
