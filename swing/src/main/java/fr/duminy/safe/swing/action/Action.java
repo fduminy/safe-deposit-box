@@ -29,7 +29,8 @@ public enum Action {
 	ADD_PASSWORD("add-password", "Add", false),
 	CANCEL_EDITION("cancel-edition", "Cancel", false),
 	UPDATE_PASSWORD("update-password", "Update", false),
-	REMOVE_PASSWORD("remove-password", "-", false);
+	REMOVE_PASSWORD("remove-password", "-", false),
+	EXIT("exit", "Exit", true);
 	
 	private final String name;
 	private final String label;

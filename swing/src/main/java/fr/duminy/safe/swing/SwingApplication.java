@@ -20,21 +20,36 @@
  */
 package fr.duminy.safe.swing;
 
+import static fr.duminy.safe.swing.action.Action.EXIT;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.EventObject;
+
 import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 
 import org.jdesktop.application.Application;
+import org.jdesktop.application.FrameView;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.View;
+import org.jdesktop.swingx.action.TargetManager;
+import org.jdesktop.swingx.action.Targetable;
 
 import fr.duminy.safe.swing.action.Action;
+import fr.duminy.safe.swing.command.Command;
+import fr.duminy.safe.swing.command.CommandSupport;
 
 
-public class SwingApplication extends SingleFrameApplication {
+public class SwingApplication extends SingleFrameApplication implements Targetable {
     public static void main(String[] args) {
         Application.launch(SwingApplication.class, args);
     }
     
+    private CommandSupport support = new CommandSupport();
     private SwingCore core;
     
     @Override
@@ -47,11 +62,40 @@ public class SwingApplication extends SingleFrameApplication {
         } catch (Exception e) {
             throw new Error(e);
         }
+        
+        TargetManager.getInstance().addTarget(this);        
+		support.addCommand(new Command(EXIT) {		
+			@Override
+			public void run() {
+				exit();
+			}
+		});		
+		
+		addExitListener(new ExitListener() {			
+			@Override
+			public void willExit(EventObject e) {
+			}
+			
+			@Override
+			public boolean canExit(EventObject e) {
+				boolean result = true;
+				
+		    	MainPanel mainPanel = (MainPanel) getMainView().getComponent();
+		    	if (mainPanel.isEditing()) {
+		    		JOptionPane jop = new JOptionPane("Password is being edited.\nPlease save it before exiting.", JOptionPane.WARNING_MESSAGE);
+		    		JDialog dlg = jop.createDialog("Password not saved");
+		    		show(dlg);
+		    		result = false;
+		    	}
+		    	
+		    	return result;
+			}
+		});
     }
     
     @Override
-    protected void shutdown() {
-        super.shutdown();
+    public void exit(EventObject e) {
+    	super.exit(e);
         
         try {
             if (core != null) {
@@ -59,6 +103,7 @@ public class SwingApplication extends SingleFrameApplication {
                 core = null;
             }
         } catch (Exception ex) {
+        	//TODO use Core.reportError 
             throw new Error(ex);
         }
     }
@@ -70,9 +115,9 @@ public class SwingApplication extends SingleFrameApplication {
         View view = getMainView();
         view.setComponent(createMainComponent());
         view.setMenuBar(createMenuBar());
-        show(view);        
+        show(view);
     }
-    
+           
     private JMenuBar createMenuBar() {
         return new JMenuBar();
     }
@@ -80,4 +125,19 @@ public class SwingApplication extends SingleFrameApplication {
     private JComponent createMainComponent() {
     	return new MainPanel(core);
     }
+
+	@Override
+	public boolean doCommand(Object command, Object value) {
+		return support.doCommand(command, value);
+	}
+
+	@Override
+	public boolean hasCommand(Object command) {
+		return support.hasCommand(command);
+	}
+
+	@Override
+	public Object[] getCommands() {
+		return support.getCommands();
+	}
 }

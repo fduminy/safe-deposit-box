@@ -24,6 +24,7 @@ import static fr.duminy.safe.swing.action.Action.ADD_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.CREATE_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.REMOVE_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.UPDATE_PASSWORD;
+import static fr.duminy.safe.swing.action.Action.EXIT;
 
 import java.awt.BorderLayout;
 
@@ -79,6 +80,10 @@ public class MainPanel extends JPanel implements Targetable {
 		JButton removeButton = new JButton(REMOVE_PASSWORD.toSwingAction());
 		removeButton.setName("removeButton");
 		toolBar.add(removeButton);
+
+		JButton exitButton = new JButton(EXIT.toSwingAction());
+		exitButton.setName("exitButton");
+		toolBar.add(exitButton);
 		
 		passwordList.addListSelectionListener(new ListSelectionListener() {			
 			@Override
@@ -119,6 +124,10 @@ public class MainPanel extends JPanel implements Targetable {
 		});
 	}
 		
+	public boolean isEditing() {
+		return passwordForm.isEditing();
+	}
+	
 	@Override
 	public boolean doCommand(Object command, Object value) {
 		return support.doCommand(command, value);

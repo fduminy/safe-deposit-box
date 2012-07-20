@@ -21,33 +21,19 @@
     USA.
 
 -->
-<release-test name="EmptyList"
+<release-test name="ExitWithExitButton"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:noNamespaceSchemaLocation="http://test-release.xsd"
-              enabled="true">
+              enabled="true">              
 
-    <description>Check the state when the list is empty</description>
-    
-    <delete file="${user.home}/passwords.safe"/>
+    <description>Test exit</description>
 
-    <gui-test>
-        <group name="Initial state">
-            <assertListSize name="passwordList" expected="0"/>
-            
-            <assertValue name="nameTextField" expected=""/>
-            <assertEditable name="nameTextField" expected="false"/>
-            
-            <assertValue name="passwordTextField" expected=""/>
-            <assertEditable name="passwordTextField" expected="false"/>
-            
-            <assertVisible name="mainButton" expected="false"/>
-            <assertVisible name="cancelButton" expected="false"/>
-            <assertEnabled name="addButton" expected="true"/>
-            <assertEnabled name="removeButton" expected="false"/>
-        </group>
-        
-        <group name="Close the application">
+    <call-method file="Exit.xmf">
+        <parameter name="exitCode">
+            <![CDATA[
             <click name="exitButton"/>
-        </group>        
-    </gui-test>
+            ]]>
+        </parameter>
+        <parameter name="exitType" value="UseExitButton"/>
+    </call-method>    
 </release-test>
