@@ -53,7 +53,7 @@ public class PasswordForm extends JPanel implements Targetable {
 				
 		support.addCommand(new Command(CREATE_PASSWORD) {
 			public void run() {
-				changeState(CREATE, new Password("", ""));
+				changeState(CREATE, createEmptyPassword());
 			}
 		});
 		support.addCommand(new Command(CANCEL_EDITION) {
@@ -63,6 +63,10 @@ public class PasswordForm extends JPanel implements Targetable {
 		});
 		
 		changeState(READ, null);
+	}
+	
+	private Password createEmptyPassword() {
+		return new Password("", "");		 //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public void viewPassword(Password password) {

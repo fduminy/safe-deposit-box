@@ -53,7 +53,7 @@ public class PasswordListPanel extends JXPanel implements Targetable {
 		JScrollPane scrollPane = new JScrollPane();
 		add(scrollPane);
 		passwordList = new JXTable(new PasswordTableModel(core));
-		passwordList.setName("passwordList");
+		passwordList.setName("passwordList"); //$NON-NLS-1$
 		scrollPane.setViewportView(passwordList);
 		
 		support.addCommand(new Command(Action.REMOVE_PASSWORD) {

@@ -20,6 +20,9 @@
  */
 package fr.duminy.safe.swing;
 
+import static fr.duminy.safe.swing.MessageKey.NAME;
+import static fr.duminy.safe.swing.MessageKey.PASSWORD;
+
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -41,7 +44,7 @@ public class PasswordTableModel extends AbstractTableModel {
 	
 	@Override
 	public String getColumnName(int column) {
-		return (column == 0) ? "name" : "password";
+		return (column == 0) ? Messages.getString(NAME) : Messages.getString(PASSWORD);
 	}
 	
 	@Override

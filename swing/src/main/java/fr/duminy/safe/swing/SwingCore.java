@@ -20,6 +20,9 @@
  */
 package fr.duminy.safe.swing;
 
+import static fr.duminy.safe.swing.MessageKey.ERROR;
+import static fr.duminy.safe.swing.MessageKey.TECHNICAL;
+
 import javax.swing.JFrame;
 
 import org.jdesktop.application.Application;
@@ -46,7 +49,7 @@ public class SwingCore extends Core {
 
     @Override
     protected void displayError(String message, Exception e) {
-        ErrorInfo info = new ErrorInfo("Error", message, null, "Technical", e, ErrorLevel.FATAL, null);
+        ErrorInfo info = new ErrorInfo(Messages.getString(ERROR), message, null, Messages.getString(TECHNICAL), e, ErrorLevel.FATAL, null);
         JFrame frame = ((SingleFrameApplication) Application.getInstance()).getMainFrame();
         
         JXErrorPane pane = new JXErrorPane();

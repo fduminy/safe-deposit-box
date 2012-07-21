@@ -20,20 +20,18 @@
  */
 package fr.duminy.safe.swing;
 
+import static fr.duminy.safe.swing.MessageKey.PASSWORD_NOT_SAVED_MESSAGE;
+import static fr.duminy.safe.swing.MessageKey.PASSWORD_NOT_SAVED_TITLE;
 import static fr.duminy.safe.swing.action.Action.EXIT;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.EventObject;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 
 import org.jdesktop.application.Application;
-import org.jdesktop.application.FrameView;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.View;
 import org.jdesktop.swingx.action.TargetManager;
@@ -42,7 +40,6 @@ import org.jdesktop.swingx.action.Targetable;
 import fr.duminy.safe.swing.action.Action;
 import fr.duminy.safe.swing.command.Command;
 import fr.duminy.safe.swing.command.CommandSupport;
-
 
 public class SwingApplication extends SingleFrameApplication implements Targetable {
     public static void main(String[] args) {
@@ -82,8 +79,8 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 				
 		    	MainPanel mainPanel = (MainPanel) getMainView().getComponent();
 		    	if (mainPanel.isEditing()) {
-		    		JOptionPane jop = new JOptionPane("Password is being edited.\nPlease save it before exiting.", JOptionPane.WARNING_MESSAGE);
-		    		JDialog dlg = jop.createDialog("Password not saved");
+		    		JOptionPane jop = new JOptionPane(Messages.getString(PASSWORD_NOT_SAVED_MESSAGE), JOptionPane.WARNING_MESSAGE);
+		    		JDialog dlg = jop.createDialog(Messages.getString(PASSWORD_NOT_SAVED_TITLE));
 		    		show(dlg);
 		    		result = false;
 		    	}

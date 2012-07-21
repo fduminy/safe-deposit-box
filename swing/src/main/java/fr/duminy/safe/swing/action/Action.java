@@ -20,24 +20,35 @@
  */
 package fr.duminy.safe.swing.action;
 
+import static fr.duminy.safe.swing.MessageKey.ACTION_ADD;
+import static fr.duminy.safe.swing.MessageKey.ACTION_CANCEL;
+import static fr.duminy.safe.swing.MessageKey.ACTION_CREATE;
+import static fr.duminy.safe.swing.MessageKey.ACTION_EDIT;
+import static fr.duminy.safe.swing.MessageKey.ACTION_EXIT;
+import static fr.duminy.safe.swing.MessageKey.ACTION_REMOVE;
+import static fr.duminy.safe.swing.MessageKey.ACTION_UPDATE;
+
 import org.jdesktop.swingx.action.ActionFactory;
 import org.jdesktop.swingx.action.ActionManager;
 
+import fr.duminy.safe.swing.MessageKey;
+import fr.duminy.safe.swing.Messages;
+
 public enum Action {
-	CREATE_PASSWORD("create-password", "+", true),
-	EDIT_PASSWORD("edit-password", "Edit", false),	
-	ADD_PASSWORD("add-password", "Add", false),
-	CANCEL_EDITION("cancel-edition", "Cancel", false),
-	UPDATE_PASSWORD("update-password", "Update", false),
-	REMOVE_PASSWORD("remove-password", "-", false),
-	EXIT("exit", "Exit", true);
+	CREATE_PASSWORD("create-password", ACTION_CREATE, true), //$NON-NLS-1$
+	EDIT_PASSWORD("edit-password", ACTION_EDIT, false),	 //$NON-NLS-1$
+	ADD_PASSWORD("add-password", ACTION_ADD, false), //$NON-NLS-1$
+	CANCEL_EDITION("cancel-edition", ACTION_CANCEL, false), //$NON-NLS-1$
+	UPDATE_PASSWORD("update-password", ACTION_UPDATE, false), //$NON-NLS-1$
+	REMOVE_PASSWORD("remove-password", ACTION_REMOVE, false), //$NON-NLS-1$
+	EXIT("exit", ACTION_EXIT, true); //$NON-NLS-1$
 	
 	private final String name;
-	private final String label;
+	private final MessageKey labelKey;
 	private final boolean initEnabled;
-	private Action(String name, String label, boolean initEnabled) {
+	private Action(String name, MessageKey labelKey, boolean initEnabled) {
 		this.name = name;
-		this.label = label;
+		this.labelKey = labelKey;
 		this.initEnabled = initEnabled;
 	}
 	
@@ -51,7 +62,7 @@ public enum Action {
 	}
 
 	public String getLabel() {
-		return label;
+		return Messages.getString(labelKey);
 	}
 
 	public void setEnabled(boolean enabled) {

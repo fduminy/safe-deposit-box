@@ -22,14 +22,21 @@ package fr.duminy.safe.swing;
 
 import static fr.duminy.safe.swing.FormState.READ;
 
+import java.awt.Component;
 import java.awt.GridLayout;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import fr.duminy.safe.core.model.Password;
+import static fr.duminy.safe.swing.MessageKey.*;
 
 public class PasswordFormButtons extends JPanel {
+    private static final Logger LOG = LoggerFactory.getLogger(PasswordFormButtons.class);
+    
 	private final JButton mainButton;
 	private final JButton cancelButton;
 	
@@ -39,16 +46,18 @@ public class PasswordFormButtons extends JPanel {
 	public PasswordFormButtons() {
 		setLayout(new GridLayout(1, 0, 0, 0));
 		
-		mainButton = new JButton("Main Action");
-		mainButton.setName("mainButton");
+		mainButton = new JButton("Main Action"); //$NON-NLS-1$
+		mainButton.setName("mainButton"); //$NON-NLS-1$
 		add(mainButton);
 		
-		cancelButton = new JButton("Cancel");
-		cancelButton.setName("cancelButton");
+		cancelButton = new JButton(Messages.getString(ACTION_CANCEL)); //$NON-NLS-1$
+		cancelButton.setName("cancelButton"); //$NON-NLS-1$
 		add(cancelButton);
+
+		logState(null, null);
 	}
 
-	public void changeState(FormState state, Password password) {	
+	public void changeState(FormState state, Password password) {
 		if (READ.equals(state)) {
 			remove(cancelButton);
 		} else {
@@ -69,5 +78,18 @@ public class PasswordFormButtons extends JPanel {
 		mainAction = state.getMainAction().toSwingAction();
 		mainAction.setEnabled(true);
 		mainButton.setAction(mainAction);
+
+		logState(state, password);		
+	}
+	
+	private void logState(FormState state, Password password) {
+		if (LOG.isDebugEnabled()) {
+//			LOG.debug("changeState: callstack:", new Exception("callstack"));
+			LOG.debug("changeState: state={} password={} components:", state, password); //$NON-NLS-1$
+			for (Component c : getComponents()) {
+				LOG.debug("c={} name={} visible={}", new Object[]{c.getClass().getName(), c.getName(), c.isVisible()});	 //$NON-NLS-1$
+			}
+			LOG.debug("--- end of components ---"); //$NON-NLS-1$
+		}
 	}
 }

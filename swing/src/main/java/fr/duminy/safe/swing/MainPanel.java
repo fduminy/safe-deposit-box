@@ -74,15 +74,15 @@ public class MainPanel extends JPanel implements Targetable {
 		add(toolBar, BorderLayout.NORTH);
 		
 		JButton addButton = new JButton(CREATE_PASSWORD.toSwingAction());
-		addButton.setName("addButton");
+		addButton.setName("addButton"); //$NON-NLS-1$
 		toolBar.add(addButton);
 		
 		JButton removeButton = new JButton(REMOVE_PASSWORD.toSwingAction());
-		removeButton.setName("removeButton");
+		removeButton.setName("removeButton"); //$NON-NLS-1$
 		toolBar.add(removeButton);
 
 		JButton exitButton = new JButton(EXIT.toSwingAction());
-		exitButton.setName("exitButton");
+		exitButton.setName("exitButton"); //$NON-NLS-1$
 		toolBar.add(exitButton);
 		
 		passwordList.addListSelectionListener(new ListSelectionListener() {			
@@ -104,7 +104,7 @@ public class MainPanel extends JPanel implements Targetable {
 			@Override
 			public void run() {
 				Password password = passwordForm.getPassword();
-				LOG.info("{} {}", ADD_PASSWORD, password);
+				LOG.info("{} {}", ADD_PASSWORD, password); //$NON-NLS-1$
 				try {
 					passwordList.addPassword(password);
 					passwordForm.viewPassword(password);
@@ -117,7 +117,7 @@ public class MainPanel extends JPanel implements Targetable {
 			@Override
 			public void run() {
 				Password password = passwordForm.getPassword();
-				LOG.info("{} {}", UPDATE_PASSWORD, password);
+				LOG.info("{} {}", UPDATE_PASSWORD, password); //$NON-NLS-1$
 				passwordForm.viewPassword(password);
 				passwordList.updatePassword(password);
 			}

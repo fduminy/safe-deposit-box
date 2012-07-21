@@ -20,6 +20,9 @@
  */
 package fr.duminy.safe.swing;
 
+import static fr.duminy.safe.swing.MessageKey.ASK_PASSWORD;
+import static fr.duminy.safe.swing.MessageKey.LOCKED;
+
 import java.awt.Dimension;
 
 import javax.swing.JComponent;
@@ -95,7 +98,7 @@ public class SwingSystem extends AbstractSystem<JComponent> {
      */
     @Override
     protected JComponent createLockComponent() {
-        return new JLabel("locked");
+        return new JLabel(Messages.getString(LOCKED));
     }
     
     /**
@@ -123,7 +126,7 @@ public class SwingSystem extends AbstractSystem<JComponent> {
         SwingUtilities.invokeLater(new Runnable() {            
             @Override
             public void run() {
-                String password = JOptionPane.showInputDialog("Password ?");
+                String password = JOptionPane.showInputDialog(Messages.getString(ASK_PASSWORD));
                 if (password == null) {
                     passwordListener.passwordCancelled();
                 } else {

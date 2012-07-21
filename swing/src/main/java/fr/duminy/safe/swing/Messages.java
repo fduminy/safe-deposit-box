@@ -18,25 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.swing.command;
+package fr.duminy.safe.swing;
 
-import fr.duminy.safe.swing.action.Action;
+import java.util.Enumeration;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-abstract public class Command {
-	private final Action action;
-	
-	public Command(Action action) {
-		this.action = action;
+public class Messages {
+	private static final String BUNDLE_NAME = "fr.duminy.safe.swing.messages"; //$NON-NLS-1$
+
+	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
+			.getBundle(BUNDLE_NAME);
+
+	private Messages() {
+	}
+
+	public static String getString(MessageKey key) {
+		try {
+			return RESOURCE_BUNDLE.getString(key.getKey());
+		} catch (MissingResourceException e) {
+			return '!' + key.getKey() + '!';
+		}
 	}
 	
-	public final String getName() {
-		return action.getName();
-	}
-	
-	abstract public void run();
-	
-	@Override
-	public String toString() {
-		return "Command[" + getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	static Enumeration<String> getKeys() {
+		return RESOURCE_BUNDLE.getKeys();
 	}
 }
