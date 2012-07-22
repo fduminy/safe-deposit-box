@@ -25,6 +25,7 @@ import static fr.duminy.safe.swing.MessageKey.ACTION_CANCEL;
 import static fr.duminy.safe.swing.MessageKey.ACTION_CREATE;
 import static fr.duminy.safe.swing.MessageKey.ACTION_EDIT;
 import static fr.duminy.safe.swing.MessageKey.ACTION_EXIT;
+import static fr.duminy.safe.swing.MessageKey.ACTION_IMPORT;
 import static fr.duminy.safe.swing.MessageKey.ACTION_REMOVE;
 import static fr.duminy.safe.swing.MessageKey.ACTION_UPDATE;
 
@@ -41,7 +42,8 @@ public enum Action {
 	CANCEL_EDITION("cancel-edition", ACTION_CANCEL, false), //$NON-NLS-1$
 	UPDATE_PASSWORD("update-password", ACTION_UPDATE, false), //$NON-NLS-1$
 	REMOVE_PASSWORD("remove-password", ACTION_REMOVE, false), //$NON-NLS-1$
-	EXIT("exit", ACTION_EXIT, true); //$NON-NLS-1$
+	EXIT("exit", ACTION_EXIT, true), //$NON-NLS-1$
+	IMPORT("import", ACTION_IMPORT, true); //$NON-NLS-1$
 	
 	private final String name;
 	private final MessageKey labelKey;

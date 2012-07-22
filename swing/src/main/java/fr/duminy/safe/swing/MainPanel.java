@@ -22,9 +22,10 @@ package fr.duminy.safe.swing;
 
 import static fr.duminy.safe.swing.action.Action.ADD_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.CREATE_PASSWORD;
+import static fr.duminy.safe.swing.action.Action.EXIT;
+import static fr.duminy.safe.swing.action.Action.IMPORT;
 import static fr.duminy.safe.swing.action.Action.REMOVE_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.UPDATE_PASSWORD;
-import static fr.duminy.safe.swing.action.Action.EXIT;
 
 import java.awt.BorderLayout;
 
@@ -81,6 +82,14 @@ public class MainPanel extends JPanel implements Targetable {
 		removeButton.setName("removeButton"); //$NON-NLS-1$
 		toolBar.add(removeButton);
 
+		toolBar.addSeparator();
+		
+		JButton importButton = new JButton(IMPORT.toSwingAction());
+		importButton.setName("importButton"); //$NON-NLS-1$
+		toolBar.add(importButton);
+		
+		toolBar.addSeparator();
+		
 		JButton exitButton = new JButton(EXIT.toSwingAction());
 		exitButton.setName("exitButton"); //$NON-NLS-1$
 		toolBar.add(exitButton);
@@ -122,6 +131,10 @@ public class MainPanel extends JPanel implements Targetable {
 				passwordList.updatePassword(password);
 			}
 		});
+	}
+	
+	public void refresh() {
+		passwordList.refresh();
 	}
 		
 	public boolean isEditing() {

@@ -37,7 +37,8 @@ public enum MessageKey {
 	ACTION_CANCEL("action.cancel"), //$NON-NLS-1$
 	ACTION_UPDATE("action.update"), //$NON-NLS-1$
 	ACTION_REMOVE("action.remove"), //$NON-NLS-1$
-	ACTION_EXIT("action.exit"); //$NON-NLS-1$
+	ACTION_EXIT("action.exit"), //$NON-NLS-1$
+	ACTION_IMPORT("action.import"); //$NON-NLS-1$
 
 	private final String key;
 	private MessageKey(String key) {

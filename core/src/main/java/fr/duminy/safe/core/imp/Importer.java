@@ -18,31 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core;
+package fr.duminy.safe.core.imp;
 
-import java.io.Closeable;
 import java.io.IOException;
+import java.io.Reader;
+import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.duminy.safe.core.model.Password;
 
-public class Utils {
-    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
-        
-    private Utils() {        
-    }
-    
-    public static void closeQuietly(Closeable closeable) {
-        try {
-            if (closeable != null) {
-                closeable.close();
-            }
-        } catch (IOException ioe) {
-            LOG.error(ioe.getMessage(), ioe);
-        }
-    }    
-    
-    public static boolean isBlank(String value) {
-    	return (value == null) || value.trim().isEmpty();
-    }
+public interface Importer {
+	String getName();
+	Collection<Password> read(Reader reader) throws IOException;
 }

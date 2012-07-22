@@ -21,6 +21,10 @@
 package fr.duminy.safe.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.picocontainer.DefaultPicoContainer;
@@ -36,6 +40,8 @@ import fr.duminy.safe.core.crypto.CryptoProvider;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
 import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
 import fr.duminy.safe.core.crypto.Key;
+import fr.duminy.safe.core.imp.CsvImporter;
+import fr.duminy.safe.core.imp.Importer;
 import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
@@ -69,6 +75,7 @@ abstract public class Core {
         container.addComponent(DefaultCryptoProvider.class);
         container.addComponent(DefaultChecksum.class);
         container.addComponent(DefaultSerializer.class);
+        container.addComponent(CsvImporter.class);
         container.addComponent(getKey(container));
     }
     	    
@@ -229,6 +236,45 @@ abstract public class Core {
     protected void finalize() throws CoreException {
         stop();
     }    
+
+    public final Collection<Importer> getImporters() {
+    	return container.getComponents(Importer.class);
+    }
+    
+    public final Collection<Password> importPasswords(Importer importer, Reader reader) throws CoreException {
+    	int nbImported = 0;
+    	
+    	Collection<Password> passwords;
+		try {
+			passwords = importer.read(reader);
+		} catch (IOException e) {
+			throw new CoreException("error while importing passwords", e);
+		}
+    	LOG.info("read {} passwords from importer", passwords.size());
+    	
+    	List<Password> failedPasswords = new ArrayList<Password>();
+    	for (Password password : passwords) {
+    		try {
+				addPassword(password);
+				nbImported++;
+			} catch (DuplicateNameException e) {
+				failedPasswords.add(password);
+			}
+    	}
+    	
+    	if (!failedPasswords.isEmpty()) {
+    		StringBuilder message = new StringBuilder();
+    		message.append(nbImported).append(" password(s) were imported but ");
+    		message.append(failedPasswords.size()).append(" were not.\n");
+    		message.append("(Duplicate) passwords that were not imported :\n");
+    		for (Password p : failedPasswords) {
+    			message.append(p).append("\n");
+    		}
+    		throw new CoreException(message.toString());
+    	}
+    	
+    	return passwords;
+    }
     
     @Override
     public String toString() {

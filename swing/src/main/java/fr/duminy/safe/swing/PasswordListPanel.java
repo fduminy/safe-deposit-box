@@ -100,4 +100,8 @@ public class PasswordListPanel extends JXPanel implements Targetable {
 	public String[] getCommands() {
 		return support.getCommands();
 	}
+	
+	public void refresh() {
+		((PasswordTableModel) passwordList.getModel()).fireTableDataChanged();		
+	}
 }

@@ -23,13 +23,26 @@ package fr.duminy.safe.swing;
 import static fr.duminy.safe.swing.MessageKey.PASSWORD_NOT_SAVED_MESSAGE;
 import static fr.duminy.safe.swing.MessageKey.PASSWORD_NOT_SAVED_TITLE;
 import static fr.duminy.safe.swing.action.Action.EXIT;
+import static fr.duminy.safe.swing.action.Action.IMPORT;
 
+import java.awt.Component;
+import java.io.File;
+import java.io.FileReader;
+import java.lang.reflect.Field;
 import java.util.EventObject;
+import java.util.Vector;
 
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.plaf.FileChooserUI;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
@@ -37,6 +50,7 @@ import org.jdesktop.application.View;
 import org.jdesktop.swingx.action.TargetManager;
 import org.jdesktop.swingx.action.Targetable;
 
+import fr.duminy.safe.core.imp.Importer;
 import fr.duminy.safe.swing.action.Action;
 import fr.duminy.safe.swing.command.Command;
 import fr.duminy.safe.swing.command.CommandSupport;
@@ -67,6 +81,41 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 				exit();
 			}
 		});		
+		support.addCommand(new Command(IMPORT) {		
+			@SuppressWarnings("serial")
+			@Override
+			public void run() {
+			    JFileChooser fileChooser = new JFileChooser();
+			    fileChooser.setMultiSelectionEnabled(true);
+			    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			    JComboBox cbxImporters = new JComboBox(new Vector<Importer>(core.getImporters()));
+			    cbxImporters.setRenderer(new DefaultListCellRenderer() {
+			    	@Override
+			    	public Component getListCellRendererComponent(
+			    			JList list, Object value, int index,
+			    			boolean isSelected, boolean cellHasFocus) {
+			    		Importer importer = (Importer) value;
+			    		super.getListCellRendererComponent(list, importer.getName(), index, isSelected,
+			    				cellHasFocus);
+			    		return this;
+			    	}
+				});
+			    fileChooser.setAccessory(cbxImporters);			    
+			    initNamesForReleaseTests(fileChooser); 
+			    int result = fileChooser.showOpenDialog(getMainFrame());
+			    if (result == JFileChooser.APPROVE_OPTION) {
+			    	Importer importer = (Importer) cbxImporters.getSelectedItem();
+			    	for (File file : fileChooser.getSelectedFiles()) {
+			    		try {
+							core.importPasswords(importer, new FileReader(file));
+						} catch (Exception e) {
+							core.displayError("failed to import from file " + file.getName() + " cause:" + e.getMessage(), e);
+						}
+			    	}
+			    	getMainPanel().refresh();
+			    }
+			}
+		});		
 		
 		addExitListener(new ExitListener() {			
 			@Override
@@ -77,7 +126,7 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 			public boolean canExit(EventObject e) {
 				boolean result = true;
 				
-		    	MainPanel mainPanel = (MainPanel) getMainView().getComponent();
+		    	MainPanel mainPanel = getMainPanel();
 		    	if (mainPanel.isEditing()) {
 		    		JOptionPane jop = new JOptionPane(Messages.getString(PASSWORD_NOT_SAVED_MESSAGE), JOptionPane.WARNING_MESSAGE);
 		    		JDialog dlg = jop.createDialog(Messages.getString(PASSWORD_NOT_SAVED_TITLE));
@@ -88,6 +137,62 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 		    	return result;
 			}
 		});
+    }
+    
+    private void initNamesForReleaseTests(JFileChooser jfc) {
+    	FileChooserUI ui = jfc.getUI();
+
+    	JTextField fileTextField = null;
+    	for (Field field : ui.getClass().getDeclaredFields()) {
+    		fileTextField = getFieldValue(ui, field, JTextField.class, fileTextField);
+    	}
+    	if (fileTextField == null) {
+    		throw new Error("Can't find JTextField in JFileChooser UI (" + ui.getClass().getName() + ")");
+    	}
+    	fileTextField.setName("fileTextField");
+    	
+    	String errorMessage = "Can't get approve button in JFileChooser UI (" + ui.getClass().getName() + ")";
+    	
+    	Field field = null;    	
+		try {
+	    	field = ui.getClass().getDeclaredField("approveButton");
+		} catch (Exception e) {
+			throw new Error(errorMessage, e);
+		}
+		
+    	JButton approveButton = null;
+		boolean accessible = field.isAccessible();
+		try {
+			field.setAccessible(true);
+			approveButton = (JButton) field.get(ui);
+		} catch (Exception e) {
+			throw new Error(errorMessage, e);
+		} finally {
+			field.setAccessible(accessible);
+		}
+    	if (approveButton == null) {
+    		throw new Error(errorMessage);
+    	}
+    	approveButton.setName("approveButton");
+    }
+    
+    private <T> T getFieldValue(final FileChooserUI ui, final Field field, final Class<T> wantedFieldClass, final T fieldValue) {
+    	T value = fieldValue;
+		if (wantedFieldClass.isAssignableFrom(field.getType())) {
+			if (value != null) {
+				throw new Error("There is more than one " + wantedFieldClass.getSimpleName() + " in JFileChooser UI (" + ui.getClass().getName() + ")");
+			}
+			boolean accessible = field.isAccessible();
+			try {
+				field.setAccessible(true);
+				value = wantedFieldClass.cast(field.get(ui));
+			} catch (Exception e) {
+				throw new Error("Can't get " + wantedFieldClass.getSimpleName(), e);
+			} finally {
+				field.setAccessible(accessible);
+			}
+		}
+		return value;
     }
     
     @Override
@@ -121,6 +226,10 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 
     private JComponent createMainComponent() {
     	return new MainPanel(core);
+    }
+
+    private MainPanel getMainPanel() {
+    	return (MainPanel) getMainView().getComponent();
     }
 
 	@Override

@@ -25,15 +25,21 @@ package fr.duminy.safe.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.Theory;
 import org.picocontainer.MutablePicoContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +47,9 @@ import org.slf4j.LoggerFactory;
 import fr.duminy.safe.core.checksum.ChecksumException;
 import fr.duminy.safe.core.crypto.CryptoProviderException;
 import fr.duminy.safe.core.crypto.Key;
+import fr.duminy.safe.core.imp.AbstractImporterTest;
+import fr.duminy.safe.core.imp.CsvImporter;
+import fr.duminy.safe.core.imp.Importer;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.core.serialization.SerializerException;
@@ -51,21 +60,19 @@ import fr.duminy.safe.core.system.System;
 import fr.duminy.safe.core.system.Timer;
 import fr.duminy.safe.core.system.UserActionListener;
 
-public class CoreTest {
-	private File file;
+public class CoreTest extends AbstractImporterTest {
 	private FakeCore core;
 	
     @Before
     public void setUp() throws Exception {
-        file = File.createTempFile("test", ".test");
 		core = new FakeCore();
     }
 
     @After
     public void tearDown() throws IOException {
-    	if (file != null) {
-    		file.delete();
-    		file = null;
+    	if (core.file != null) {
+    		core.file.delete();
+    		core.file = null;
     	}
     }
 	
@@ -102,13 +109,13 @@ public class CoreTest {
 
 	@Test
 	public void testAddPassword() {
-		core.addPassword(new Password("test", "test"));
+		addPassword();
 	}
 
 	@Test
 	public void testRemovePassword() {
-		Password p = new Password("test", "test");
-		core.addPassword(p);
+		Password p = addPassword();
+		
 		List<Password> passwords = core.getPasswords();
 		assertEquals(1, passwords.size());
 		assertSame(p, passwords.get(0));
@@ -120,18 +127,101 @@ public class CoreTest {
 	
 	@Test
 	public void testGetPasswords() {
-		Password p = new Password("test", "test");
-		core.addPassword(p);
+		Password p = addPassword();
 		
 		List<Password> passwords = core.getPasswords();
 		assertNotNull(passwords);
 		assertEquals(1, passwords.size());
 		assertSame(p, passwords.get(0));
 	}
+	
+	@Theory
+	public void testGetImporters(Importer importer) {
+		Collection<Importer> importers = core.getImporters();
+		assertEquals(1, importers.size());
+		assertEquals(CsvImporter.class, importers.iterator().next().getClass());
+	}
+	
+	@Theory
+	public void testImportPasswords_InitiallyEmpty(Importer importer) throws Exception {
+		CsvData csvData = new CsvData(CsvImporter.COLUMN_NAMES, "pass1", "name1", false);
+		testImportPasswords(importer, csvData);
+	}
+	
+	@Theory
+	public void testImportPasswords_DuplicatePassword(Importer importer) throws Exception {
+		CsvData csvData = new CsvData(CsvImporter.COLUMN_NAMES, "pass1", "name1", true);
+		try {
+			testImportPasswords(importer, csvData);
+			fail("must throw an exception");
+		} catch (CoreException e) {
+			assertTrue("must throw an exception for duplicate", e.getMessage().toLowerCase().contains("duplicate"));
+		}
+	}
+	
+	private void testImportPasswords(Importer importer, CsvData csvData) throws Exception {
+		for (Password pwd : csvData.getInitialPasswords()) {
+			core.addPassword(pwd);
+		}
+		
+		Collection<Password> importedPasswords = importPasswords(importer, csvData.getColumns(), csvData.getValues());
+		assertNotNull(importedPasswords);
+		assertEquals(1, importedPasswords.size());
+		
+		Password pwd = importedPasswords.iterator().next();
+		assertEquals(pwd.getName(), csvData.getValues()[0]);
+		assertEquals(pwd.getPassword(), csvData.getValues()[4]);
+	}
+	
+	@Override
+	protected Collection<Password> doImportPasswords(Importer importer, String csvData) throws Exception {
+		return core.importPasswords(importer, new StringReader(csvData));
+	}
+	
+	private Password addPassword() {
+		Password p = new Password("test", "test");
+		core.addPassword(p);
+		return p;
+	}
+	
+	private static class CsvData {
+		private final String[] columns;
+		private final String[] values;
+		private final Collection<Password> initialPasswords;
+		
+		public CsvData(String[] columns, String name, String password, boolean addAsInitialPassword) {
+			this.columns = columns;
+			this.values = generateCsvRow(name, password);
+			
+			if (addAsInitialPassword) {
+				initialPasswords = Collections.singleton(new Password(name, password));
+			} else {
+				initialPasswords = Collections.emptyList();
+			}
+		}
+		
+		public String[] getColumns() {
+			return columns;
+		}
+		public String[] getValues() {
+			return values;
+		}
+		public Collection<Password> getInitialPasswords() {
+			return initialPasswords;
+		}
 
-	public class FakeCore extends Core {
+		@Override
+		public String toString() {
+			return "CsvData [columns=" + Arrays.toString(columns) + ", values="
+					+ Arrays.toString(values) + ", initialPasswords="
+					+ initialPasswords + "]";
+		}		
+	}
+	
+	public static class FakeCore extends Core {
 		private Logger LOG = LoggerFactory.getLogger(FakeCore.class);
 		
+		private File file;
 		private boolean displayErrorCalled = false;
 		
 		public FakeCore() {
@@ -163,6 +253,14 @@ public class CoreTest {
 		
 		@Override
 		protected File getPasswordFile() {
+			if (file == null) {
+				try {
+					file = File.createTempFile("test", ".test");
+				} catch (IOException e) {
+					throw new Error(e);
+				}
+			}
+			
 			return file;
 		}
 		
