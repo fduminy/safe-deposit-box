@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>safe.TMP</name>
+			<type>2</type>
+			<location>/home/fabien/projets/perso/safe.TMP</location>
+		</link>
+	</linkedResources>
 </projectDescription>

@@ -31,6 +31,7 @@ public enum MessageKey {
 	TECHNICAL("technical"), //$NON-NLS-1$
 	ASK_PASSWORD("askPassword"), //$NON-NLS-1$
 	LOCKED("locked"), //$NON-NLS-1$
+	
 	ACTION_CREATE("action.create"), //$NON-NLS-1$
 	ACTION_EDIT("action.edit"), //$NON-NLS-1$
 	ACTION_ADD("action.add"), //$NON-NLS-1$
@@ -38,8 +39,26 @@ public enum MessageKey {
 	ACTION_UPDATE("action.update"), //$NON-NLS-1$
 	ACTION_REMOVE("action.remove"), //$NON-NLS-1$
 	ACTION_EXIT("action.exit"), //$NON-NLS-1$
-	ACTION_IMPORT("action.import"); //$NON-NLS-1$
+	ACTION_IMPORT("action.import"), //$NON-NLS-1$
 
+	ACTION_CREATE_DESCRIPTION("action.create.description"), //$NON-NLS-1$
+	ACTION_EDIT_DESCRIPTION("action.edit.description"), //$NON-NLS-1$
+	ACTION_ADD_DESCRIPTION("action.add.description"), //$NON-NLS-1$
+	ACTION_CANCEL_DESCRIPTION("action.cancel.description"), //$NON-NLS-1$
+	ACTION_UPDATE_DESCRIPTION("action.update.description"), //$NON-NLS-1$
+	ACTION_REMOVE_DESCRIPTION("action.remove.description"), //$NON-NLS-1$
+	ACTION_EXIT_DESCRIPTION("action.exit.description"), //$NON-NLS-1$
+	ACTION_IMPORT_DESCRIPTION("action.import.description"); //$NON-NLS-1$
+	
+	public static MessageKey fromKey(String key) {
+		for (MessageKey m : values()) {
+			if (m.getKey().equals(key)) {
+				return m;
+			}
+		}
+		throw new IllegalArgumentException("No MessageKey found for key '" + key + "'");
+	}
+	
 	private final String key;
 	private MessageKey(String key) {
 		this.key = key;

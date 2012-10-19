@@ -24,21 +24,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jdesktop.swingx.action.Targetable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommandSupport implements Targetable {
+    private static final Logger LOG = LoggerFactory.getLogger(CommandSupport.class);
+	
 	private final Map<String, Command> commands = new HashMap<String, Command>(); 
 	
 	public void addCommand(Command command) {
+		LOG.debug("adding command '{}'", command.getName());
 		commands.put(command.getName(), command);
 	}
 	
 	@Override
 	public boolean doCommand(Object command, Object value) {
 		boolean result = false;
-		Command cmd = commands.get(convertCommandtoString(command));
+		String cmdName = convertCommandtoString(command);
+		Command cmd = commands.get(cmdName);
 		if (cmd != null) {
+			LOG.debug("executing command '{}'", cmdName);			
 			cmd.run();
 			result = true;
+		} else {
+			LOG.debug("no command for name '{}'", cmdName);
 		}
 		return result;
 	}
@@ -49,6 +58,11 @@ public class CommandSupport implements Targetable {
 	@Override
 	public String[] getCommands() {
 		return commands.keySet().toArray(new String[commands.size()]);
+	}
+	
+	public void removeCommands() {
+		LOG.debug("clearing commands {}", commands.keySet());
+		commands.clear();
 	}
 	
 	private final String convertCommandtoString(Object command) {

@@ -21,21 +21,19 @@
 package fr.duminy.safe.swing;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionListener;
 
-import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.action.Targetable;
 
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.action.Action;
 import fr.duminy.safe.swing.command.Command;
-import fr.duminy.safe.swing.command.CommandSupport;
 
-public class PasswordListPanel extends JXPanel implements Targetable {
-	private final CommandSupport support = new CommandSupport();	
+@SuppressWarnings("serial")
+public class PasswordListPanel extends SPanel {
 	private final JXTable passwordList;
 	private final SwingCore core;
 
@@ -56,14 +54,27 @@ public class PasswordListPanel extends JXPanel implements Targetable {
 		passwordList.setName("passwordList"); //$NON-NLS-1$
 		scrollPane.setViewportView(passwordList);
 		
-		support.addCommand(new Command(Action.REMOVE_PASSWORD) {
+		addCommand(new Command(Action.REMOVE_PASSWORD) {
 			public void run() {
-				int row = passwordList.getSelectedRow();
-				Password pwd = core.getPasswords().get(row);
-				core.removePassword(pwd);
-				((PasswordTableModel) passwordList.getModel()).fireTableRowsDeleted(row, row);
-				row = (row > 0) ? (row - 1) : 0;
-				passwordList.getSelectionModel().setSelectionInterval(row , row);
+				int[] rows = passwordList.getSelectedRows();
+				if (rows.length > 0) {
+					for (int i = rows.length - 1; i >= 0; i--) {
+						rows[i] = convertRowIndexToModel(rows[i]);
+					}
+					Arrays.sort(rows);
+					
+					int row = 0;
+					for (int i = rows.length - 1; i >= 0; i--) {
+						row = rows[i]; 
+						Password pwd = core.getPasswords().get(row);
+						core.removePassword(pwd);
+					}
+					
+					((PasswordTableModel) passwordList.getModel()).fireTableRowsDeleted(rows[0], rows[rows.length - 1]);
+					
+					row = (row > 0) ? (row - 1) : 0;
+					passwordList.getSelectionModel().setSelectionInterval(row , row);
+				}
 			}
 		});
 	}
@@ -72,7 +83,11 @@ public class PasswordListPanel extends JXPanel implements Targetable {
 		passwordList.getSelectionModel().addListSelectionListener(listener);
 	}
 	public int getSelectedRow() {
-		return passwordList.getSelectedRow();
+		return convertRowIndexToModel(passwordList.getSelectedRow());
+	}
+	
+	private int convertRowIndexToModel(int rowIndex) {
+		return (rowIndex < 0) ? -1 : passwordList.convertRowIndexToModel(rowIndex);
 	}
 	
 	public void addPassword(Password password) {
@@ -83,22 +98,11 @@ public class PasswordListPanel extends JXPanel implements Targetable {
 	}
 
 	public void updatePassword(Password password) {
-		int row = core.getPasswords().indexOf(password);
+		//int row = core.getPasswords().indexOf(password);
+		int row = passwordList.getSelectionModel().getMinSelectionIndex();
+		core.getPasswords().set(row, password);
 		((PasswordTableModel) passwordList.getModel()).fireTableRowsUpdated(row, row);
 		passwordList.getSelectionModel().setSelectionInterval(row , row);
-	}
-	
-	@Override
-	public boolean doCommand(Object command, Object value) {
-		return support.doCommand(command, value);
-	}
-	@Override
-	public boolean hasCommand(Object command) {
-		return support.hasCommand(command);
-	}
-	@Override
-	public String[] getCommands() {
-		return support.getCommands();
 	}
 	
 	public void refresh() {

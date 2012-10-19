@@ -23,9 +23,9 @@ package fr.duminy.safe.swing;
 import static fr.duminy.safe.swing.MessageKey.ERROR;
 import static fr.duminy.safe.swing.MessageKey.TECHNICAL;
 
+import javax.swing.Action;
 import javax.swing.JFrame;
 
-import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
@@ -46,13 +46,23 @@ public class SwingCore extends Core {
         
         container.addComponent(SwingSystem.class);
     }
+    
+    public void setApplication(SingleFrameApplication app) {
+    	addComponent(app);
+    }
 
     @Override
     protected void displayError(String message, Exception e) {
-        ErrorInfo info = new ErrorInfo(Messages.getString(ERROR), message, null, Messages.getString(TECHNICAL), e, ErrorLevel.FATAL, null);
-        JFrame frame = ((SingleFrameApplication) Application.getInstance()).getMainFrame();
+//        ErrorInfo info = new ErrorInfo(Messages.getString(ERROR), message, null, Messages.getString(TECHNICAL), e, ErrorLevel.FATAL, null);
+    	ErrorInfo info = new ErrorInfo(Messages.getString(ERROR), message, null, Messages.getString(TECHNICAL), e, ErrorLevel.SEVERE, null);
+        JFrame frame = getComponent(SingleFrameApplication.class).getMainFrame();
         
         JXErrorPane pane = new JXErrorPane();
+        
+        // set fatal action so that System.exit() won't be called directly
+        Action fatalAction = fr.duminy.safe.swing.action.Action.EXIT.toSwingAction();
+        pane.getActionMap().put(JXErrorPane.FATAL_ACTION_KEY, fatalAction);
+        
         pane.setErrorInfo(info);
         pane.setErrorReporter(new ErrorReporter() {            
             @Override

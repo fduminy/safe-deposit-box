@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 
 import fr.duminy.safe.core.model.Password;
 
+@SuppressWarnings("serial")
 public class PasswordFormFields extends JPanel {
     private JTextField nameTextField;
     private JTextField passwordTextField;

@@ -30,7 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.jdesktop.application.Application;
 import org.jdesktop.application.FrameView;
 
 import fr.duminy.safe.core.system.AbstractSystem;
@@ -38,8 +37,10 @@ import fr.duminy.safe.core.system.PasswordListener;
 import fr.duminy.safe.core.system.Timer;
 
 public class SwingSystem extends AbstractSystem<JComponent> {
-    
-    public SwingSystem() {
+	private final SwingApplication application;
+	
+    public SwingSystem(SwingApplication application) {
+    	this.application = application;
         ActionListener l = new ActionListener() {            
             @Override
             void actionPerformed() {
@@ -111,7 +112,7 @@ public class SwingSystem extends AbstractSystem<JComponent> {
     }
 
     private SwingApplication getApplication() {
-        return Application.getInstance(SwingApplication.class);        
+        return application;        
     }
     
     private FrameView getMainView() {

@@ -78,6 +78,14 @@ abstract public class Core {
         container.addComponent(CsvImporter.class);
         container.addComponent(getKey(container));
     }
+    
+    protected <T> void addComponent(Object component) {
+    	container.addComponent(component);
+    }
+    
+    protected <T> T getComponent(Class<T> componentClass) {
+    	return container.getComponent(componentClass);
+    }
     	    
     protected Key getKey(MutablePicoContainer container) {
     	Key result = container.getComponent(Key.class);
@@ -94,6 +102,7 @@ abstract public class Core {
     }
     
     public final void start() throws CoreException {
+    	container.start();
         loadModel();
         
         final System system = container.getComponent(System.class);
@@ -125,7 +134,13 @@ abstract public class Core {
 
     public final void loadModel() throws CoreException {    	
         Model model = container.getComponent(Model.class);
+        if (container.getLifecycleState().isStarted()) {
+        	container.stop();
+        }
         container.removeComponentByInstance(model);
+        if (container.getLifecycleState().isStopped()) {
+        	container.start();
+        }
         
     	try {            
     		Data<Model> d = load();
@@ -136,6 +151,7 @@ abstract public class Core {
     		} else {
     			model = new Model();
     		}
+    		LOG.debug("{} passwords loaded from file", model.getPasswords().size());
 		} catch (Exception e) {
 			throw new CoreException("can't load passwords", e);
 		}
@@ -215,6 +231,9 @@ abstract public class Core {
     
     public void stop() throws CoreException {
         storeModel();
+        if (container.getLifecycleState().isStarted()) {
+        	container.stop();
+        }
     }
 
     public void addPassword(Password password) throws DuplicateNameException {
@@ -243,6 +262,10 @@ abstract public class Core {
     
     public final Collection<Password> importPasswords(Importer importer, Reader reader) throws CoreException {
     	int nbImported = 0;
+    	
+    	LOG.debug("before import: core contains {} passwords. password file : {}. runtime={}", 
+    			new Object[]{getPasswords().size(), getPasswordFile().exists() ?  "exists" : "doesn't exist",
+    					Runtime.getRuntime()});
     	
     	Collection<Password> passwords;
 		try {

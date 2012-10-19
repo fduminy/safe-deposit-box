@@ -32,8 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.duminy.safe.core.model.Password;
-import static fr.duminy.safe.swing.MessageKey.*;
+import fr.duminy.safe.swing.action.Action;
 
+@SuppressWarnings("serial")
 public class PasswordFormButtons extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(PasswordFormButtons.class);
     
@@ -48,25 +49,21 @@ public class PasswordFormButtons extends JPanel {
 		
 		mainButton = new JButton("Main Action"); //$NON-NLS-1$
 		mainButton.setName("mainButton"); //$NON-NLS-1$
-		add(mainButton);
 		
-		cancelButton = new JButton(Messages.getString(ACTION_CANCEL)); //$NON-NLS-1$
+		cancelButton = new JButton(Action.CANCEL_EDITION.toSwingAction()); //$NON-NLS-1$
 		cancelButton.setName("cancelButton"); //$NON-NLS-1$
-		add(cancelButton);
 
-		logState(null, null);
+		changeState(null, null);
 	}
 
 	public void changeState(FormState state, Password password) {
-		if (READ.equals(state)) {
-			remove(cancelButton);
-		} else {
+		removeAll();
+		
+		if (!READ.equals(state)) {
 			add(cancelButton);	
 		}
 
-		if (password == null) {
-			remove(mainButton);	
-		} else {
+		if (password != null) {
 			add(mainButton);
 		}
 		
@@ -75,10 +72,12 @@ public class PasswordFormButtons extends JPanel {
 			mainAction.setEnabled(false);
 		}
 		
-		mainAction = state.getMainAction().toSwingAction();
-		mainAction.setEnabled(true);
-		mainButton.setAction(mainAction);
-
+		if (state != null) {
+			mainAction = state.getMainAction().toSwingAction();
+			mainAction.setEnabled(true);
+			mainButton.setAction(mainAction);
+		}
+		
 		logState(state, password);		
 	}
 	
@@ -91,5 +90,13 @@ public class PasswordFormButtons extends JPanel {
 			}
 			LOG.debug("--- end of components ---"); //$NON-NLS-1$
 		}
+	}
+
+	public JButton getMainButton() {
+		return mainButton;
+	}
+
+	public JButton getCancelButton() {
+		return cancelButton;
 	}
 }

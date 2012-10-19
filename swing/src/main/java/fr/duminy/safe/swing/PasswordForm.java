@@ -22,22 +22,18 @@ package fr.duminy.safe.swing;
 
 import static fr.duminy.safe.swing.FormState.CREATE;
 import static fr.duminy.safe.swing.FormState.READ;
+import static fr.duminy.safe.swing.FormState.UPDATE;
 import static fr.duminy.safe.swing.action.Action.CANCEL_EDITION;
 import static fr.duminy.safe.swing.action.Action.CREATE_PASSWORD;
+import static fr.duminy.safe.swing.action.Action.EDIT_PASSWORD;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JPanel;
-
-import org.jdesktop.swingx.action.Targetable;
-
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.command.Command;
-import fr.duminy.safe.swing.command.CommandSupport;
 
-public class PasswordForm extends JPanel implements Targetable {
-	private final CommandSupport support = new CommandSupport();	
-	
+@SuppressWarnings("serial")
+public class PasswordForm extends SPanel {
 	private final PasswordFormButtons passwordFormButtons;
 	private final PasswordFormFields passwordFormFields;
 	private FormState state = READ;
@@ -51,14 +47,19 @@ public class PasswordForm extends JPanel implements Targetable {
 		passwordFormFields = new PasswordFormFields();
 		add(passwordFormFields, BorderLayout.CENTER);
 				
-		support.addCommand(new Command(CREATE_PASSWORD) {
+		addCommand(new Command(CREATE_PASSWORD) {
 			public void run() {
 				changeState(CREATE, createEmptyPassword());
 			}
 		});
-		support.addCommand(new Command(CANCEL_EDITION) {
+		addCommand(new Command(CANCEL_EDITION) {
 			public void run() {
 				changeState(READ, null);
+			}
+		});
+		addCommand(new Command(EDIT_PASSWORD) {
+			public void run() {
+				changeState(UPDATE, getPassword());
 			}
 		});
 		
@@ -85,18 +86,5 @@ public class PasswordForm extends JPanel implements Targetable {
 	
 	public boolean isEditing() {
 		return state.isEditing();
-	}
-	
-	@Override
-	public boolean doCommand(Object command, Object value) {
-		return support.doCommand(command, value);
-	}
-	@Override
-	public boolean hasCommand(Object command) {
-		return support.hasCommand(command);
-	}
-	@Override
-	public String[] getCommands() {
-		return support.getCommands();
 	}
 }

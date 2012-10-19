@@ -29,6 +29,7 @@ import static fr.duminy.safe.swing.MessageKey.ACTION_IMPORT;
 import static fr.duminy.safe.swing.MessageKey.ACTION_REMOVE;
 import static fr.duminy.safe.swing.MessageKey.ACTION_UPDATE;
 
+import org.jdesktop.swingx.action.AbstractActionExt;
 import org.jdesktop.swingx.action.ActionFactory;
 import org.jdesktop.swingx.action.ActionManager;
 
@@ -78,8 +79,14 @@ public enum Action {
 	public static void init() {
    	 	ActionManager manager = ActionManager.getInstance();
     	for (Action a : Action.values()) {
-    		javax.swing.Action action = ActionFactory.createTargetableAction(a.getName(), a.getLabel()); 
+    		javax.swing.Action action = ActionFactory.createTargetableAction(a.getName(), a.getLabel());
     		action.setEnabled(a.initEnabled);
+    		
+    		// set description for tooltip text
+    		String description = Messages.getString(MessageKey.fromKey(a.labelKey.getKey() + ".description"));
+    		((AbstractActionExt) action).setShortDescription(description);
+    		((AbstractActionExt) action).setLongDescription(description);
+    		
     		manager.addAction(action);
     	}
 	}

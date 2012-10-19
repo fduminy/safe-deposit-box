@@ -44,11 +44,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.plaf.FileChooserUI;
 
-import org.jdesktop.application.Application;
+import org.jdesktop.application.SafUtils;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.View;
+import org.jdesktop.swingx.action.ActionManager;
 import org.jdesktop.swingx.action.TargetManager;
 import org.jdesktop.swingx.action.Targetable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.duminy.safe.core.imp.Importer;
 import fr.duminy.safe.swing.action.Action;
@@ -56,18 +59,29 @@ import fr.duminy.safe.swing.command.Command;
 import fr.duminy.safe.swing.command.CommandSupport;
 
 public class SwingApplication extends SingleFrameApplication implements Targetable {
+    private static final Logger LOG = LoggerFactory.getLogger(SwingApplication.class);
+    	
     public static void main(String[] args) {
-        Application.launch(SwingApplication.class, args);
+    	LOG.debug("before main");
+    	
+//        Application.launch(SwingApplication.class, args);
+    	SafUtils.launchIt(SwingApplication.class, args);
+    	
+        LOG.debug("after main : ");        
     }
     
-    private CommandSupport support = new CommandSupport();
+    private CommandSupport support;
     private SwingCore core;
+    
+    private ExitListener exitListener;
     
     @Override
     protected void initialize(String[] args) {
         super.initialize(args);
         try {
+        	support = new CommandSupport();
             core = new SwingCore();
+            core.setApplication(this);
             
             core.start();            
         } catch (Exception e) {
@@ -78,6 +92,7 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 		support.addCommand(new Command(EXIT) {		
 			@Override
 			public void run() {
+				LOG.debug("exit button clicked");
 				exit();
 			}
 		});		
@@ -117,26 +132,48 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 			}
 		});		
 		
-		addExitListener(new ExitListener() {			
+		exitListener = new ExitListener() {	
+			private Boolean canExit;
 			@Override
 			public void willExit(EventObject e) {
 			}
 			
 			@Override
 			public boolean canExit(EventObject e) {
-				boolean result = true;
+				if (canExit == null) {
+					boolean result = true;
+					
+			    	MainPanel mainPanel = getMainPanel();
+			    	LOG.debug("canExit: callstack", new Exception("callstack"));
+			    	mainPanel.setSize(666, 666);
+			    	LOG.debug("canExit: mainPanel={} isEditing={}", mainPanel, (mainPanel == null) ? false : mainPanel.isEditing());
+			    	if ((mainPanel != null) && mainPanel.isEditing()) {
+			    		displayWarningDialog();
+			    		result = false;
+			    	} else {
+			    		LOG.debug("canExit: DO NOT display info panel");
+			    	}
+			    	
+			    	canExit = result;
+				} else {
+					if (!canExit) {
+						displayWarningDialog();
+					}
+				}
 				
-		    	MainPanel mainPanel = getMainPanel();
-		    	if (mainPanel.isEditing()) {
-		    		JOptionPane jop = new JOptionPane(Messages.getString(PASSWORD_NOT_SAVED_MESSAGE), JOptionPane.WARNING_MESSAGE);
-		    		JDialog dlg = jop.createDialog(Messages.getString(PASSWORD_NOT_SAVED_TITLE));
-		    		show(dlg);
-		    		result = false;
-		    	}
-		    	
-		    	return result;
+				LOG.debug("canExit: result={}", canExit);
+				return canExit;
 			}
-		});
+		};
+		addExitListener(exitListener);
+    }
+    
+    private void displayWarningDialog() {
+		LOG.debug("canExit: display warn panel");
+		JOptionPane jop = new JOptionPane(Messages.getString(PASSWORD_NOT_SAVED_MESSAGE), JOptionPane.WARNING_MESSAGE);
+		JDialog dlg = jop.createDialog(Messages.getString(PASSWORD_NOT_SAVED_TITLE));
+		LOG.debug("canExit: closeOperation={}", dlg.getDefaultCloseOperation());
+		show(dlg);
     }
     
     private void initNamesForReleaseTests(JFileChooser jfc) {
@@ -195,21 +232,6 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 		return value;
     }
     
-    @Override
-    public void exit(EventObject e) {
-    	super.exit(e);
-        
-        try {
-            if (core != null) {
-                core.stop();
-                core = null;
-            }
-        } catch (Exception ex) {
-        	//TODO use Core.reportError 
-            throw new Error(ex);
-        }
-    }
-    
     @Override 
     protected void startup() {
         Action.init();
@@ -220,6 +242,39 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
         show(view);
     }
            
+    @Override
+    protected void end() {
+    	LOG.debug("application will shutdown");
+    	
+        try {
+            if (core != null) {
+                core.stop();
+                core = null;
+                support.removeCommands();
+                for (Object key : ActionManager.getInstance().allKeys()) {
+                	ActionManager.getInstance().remove(key);
+                }
+                TargetManager.getInstance().removeTarget(this);
+                support = null;
+            }
+        } catch (Exception ex) {
+        	LOG.error("error in exit", ex);
+        	//TODO use Core.reportError 
+            throw new Error(ex);
+        }
+    	
+        removeExitListener(exitListener);
+        exitListener = null;
+        
+        SPanel panel = getMainPanel();
+        panel.dispose();
+        getMainView().setComponent(null);
+    	
+//    	System.exit(0);
+        LOG.debug("application will shutdown NOW !");
+        super.end();
+    }
+    
     private JMenuBar createMenuBar() {
         return new JMenuBar();
     }
