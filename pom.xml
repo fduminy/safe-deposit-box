@@ -128,11 +128,20 @@
 				<version>1.4.0</version>
 				<configuration>
 					<header>${project.root}/src/etc/header.txt</header>
+                    <useDefaultExcludes>true</useDefaultExcludes>									
 					<excludes>
 						<exclude>LICENSE.txt</exclude>
 						<exclude>**/src/test/resources/**</exclude>
 						<exclude>**/.git/**</exclude>
-					</excludes>
+                        <exclude>**/*.csv</exclude>
+						<exclude>**/*.xls</exclude>
+						<exclude>**/.gitignore</exclude>
+                    </excludes>
+                    <useDefaultMapping>true</useDefaultMapping>
+                    <mapping>
+	                    <xmf>XML_STYLE</xmf>
+	                    <config>SCRIPT_STYLE</config>
+	                </mapping>                    
 				</configuration>
 				<executions>
 					<execution>
