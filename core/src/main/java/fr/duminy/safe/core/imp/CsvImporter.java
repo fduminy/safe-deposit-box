@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,10 @@ import fr.duminy.safe.core.model.Password;
 public class CsvImporter implements Importer {
     private static final Logger LOG = LoggerFactory.getLogger(CsvImporter.class);
     
-    public static String[] COLUMN_NAMES = {"TITLE", "CATEGORY", "EMAIL", "USERNAME", "PASSWORD", "URL", "NOTES", "OTHER", "DATE_EXPIRES","TYPE"};
+    public static String TITLE = "TITLE";
+    public static String PASSWORD = "PASSWORD";
+    public static String[] REQUIRED_COLUMN_NAMES = {TITLE, PASSWORD};
+    public static String[] COLUMN_NAMES = {TITLE, "CATEGORY", "EMAIL", "USERNAME", PASSWORD, "URL", "NOTES", "OTHER", "DATE_EXPIRES","TYPE"};
     
 	@Override
 	public String getName() {
@@ -78,26 +83,20 @@ public class CsvImporter implements Importer {
 			    	}
 		    	}
 		    	
-	    		String name = null;
-	    		String password = null;
+	    		Map<String, String> properties = new HashMap<String, String>();
 	    		for (int i = 0; i < nextLine.length; i++) {
 	    			String property = headers[i].trim().toUpperCase();
 	    			String value = nextLine[i];
 	    			LOG.debug("line: property={} value={}", property, value);
 	    			
-	    			//TODO support these properties : TITLE,CATEGORY,EMAIL,USERNAME,PASSWORD,URL,NOTES,OTHER,DATE_EXPIRES,TYPE
-	    			if ("TITLE".equals(property)) {
-	    				name = value;
-	    			} else if ("PASSWORD".equals(property)) {
-	    				password = value;
-	    			}
+	    			properties.put(property, value);
 	    		}
 	    		
-	    		if (Utils.isBlank(name) || Utils.isBlank(password)) {
+	    		if (isBlank(properties, REQUIRED_COLUMN_NAMES)) {
 	    			LOG.debug("skipping line");
 	    		} else {
 	    			LOG.debug("adding line");
-	    			passwords.add(new Password(name, password));
+	    			passwords.add(createPassword(properties));
 	    		}
 		    }
 		} finally {
@@ -108,5 +107,19 @@ public class CsvImporter implements Importer {
 		}
 		
 		return passwords;
+	}
+
+	private boolean isBlank(Map<String, String> properties,
+			String[] requiredColumns) {
+		boolean blank = false;
+		for (String requiredProperty : requiredColumns) {
+			blank |= Utils.isBlank(properties.get(requiredProperty)); 
+		}
+		return blank;
+	}
+	
+	private Password createPassword(Map<String, String> properties) {		
+		//TODO support these properties : TITLE,CATEGORY,EMAIL,USERNAME,PASSWORD,URL,NOTES,OTHER,DATE_EXPIRES,TYPE
+		return new Password(properties.get(TITLE), properties.get(PASSWORD));
 	}
 }
