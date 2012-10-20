@@ -10,7 +10,7 @@
 	<name>${applicationName} - Parent POM</name>
 	
     <url>http://gitorious.org/safe/pages/Home</url>
-
+    <inceptionYear>2012</inceptionYear>
 	<licenses>
 		<license>
 			<name>GPL 3.0</name>
@@ -142,6 +142,10 @@
 	                    <xmf>XML_STYLE</xmf>
 	                    <config>SCRIPT_STYLE</config>
 	                </mapping>                    
+                    <properties>
+                        <inceptionYear>${project.inceptionYear}</inceptionYear>
+                        <year>2012</year>
+                    </properties>                    
 				</configuration>
 				<executions>
 					<execution>
