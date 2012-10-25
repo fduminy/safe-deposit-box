@@ -18,14 +18,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.imp;
+package fr.duminy.safe.swing;
 
-import java.io.IOException;
-import java.io.Reader;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 
-import fr.duminy.safe.core.model.Model;
+import fr.duminy.safe.core.model.Category;
 
-public interface Importer {
-	String getName();
-	Model read(Reader reader) throws IOException;
+public class CategoryNode extends AbstractMutableTreeTableNode {
+	public CategoryNode(Category category) {
+		super(category);
+	}
+
+	@Override
+	public Object getValueAt(int column) {
+		return getCategory().getName();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return 1;
+	}
+
+	private Category getCategory() {
+		return (Category)getUserObject();
+	}
+	
+	@Override
+	public String toString() { 
+		return getCategory().getName();
+	}
 }

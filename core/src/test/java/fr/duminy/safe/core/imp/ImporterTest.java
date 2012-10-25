@@ -20,18 +20,22 @@
  */
 package fr.duminy.safe.core.imp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static fr.duminy.safe.core.TestUtils.category;
+import static fr.duminy.safe.core.TestUtils.password;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Collection;
-import java.util.Iterator;
 
 import org.junit.experimental.theories.Theory;
 
-import fr.duminy.safe.core.model.Password;
+import fr.duminy.safe.core.model.Category;
+import fr.duminy.safe.core.model.CategoryFinder;
+import fr.duminy.safe.core.model.Model;
 
+/**
+ * @author fabien
+ */
 public class ImporterTest extends AbstractImporterTest {
 	@Theory
 	public void testImport_EmptyFile_NoHeaders(Importer importer) throws Exception {
@@ -58,28 +62,32 @@ public class ImporterTest extends AbstractImporterTest {
 		String csvData = "messagerie,,,,,,,,,\"Web Site\"\n" +
 		"title1,,,username1,pass1,www.site1.com,,,,\"Web Site\"\n" +
 		"title2,,,username2,pass2,www.site2.com,,,,\"Web Site\"";
-		Collection<Password> passwords = doImportPasswords(importer, csvData);		
-		assertNotNull(passwords);
-		assertEquals(2, passwords.size());		
+		Model model = doImportPasswords(importer, csvData);
 		
-		Iterator<Password> it = passwords.iterator();
-		Password p = it.next();
-		assertEquals("title1", p.getName());
-		assertEquals("pass1", p.getPassword());
+		assertThat(model).isNotNull();
 		
-		p = it.next();
-		assertEquals("title2", p.getName());
-		assertEquals("pass2", p.getPassword());		
-	}
-
-	private void testImport_SingleLine(Importer importer, String[] columns) throws Exception {
-		Collection<Password> passwords = importPasswords(importer, columns, generateCsvRow("name1", "password1"));
-		Password p = passwords.iterator().next();
-		assertEquals("name1", p.getName());
-		assertEquals("password1", p.getPassword());
+		assertThat(model.getPasswords()).isNotNull().hasSize(2);
+		assertThat(model.getPasswords()).usingElementComparator(PASSWORD_COMPARATOR).containsExactly(
+				password("title1", "pass1"), password("title2", "pass2"));
+		
+		Category root = category("root");
+		assertThat(model.getRootCategory()).isNotNull();
+		assertThat(model.getRootCategory()).isEqualsToByComparingFields(root);
+		
+		Category expected = category("messagerie");
+		Category actual = CategoryFinder.find(model.getRootCategory(), expected.getName()); 
+		assertThat(actual).isEqualsToByComparingFields(expected);		
+		assertThat(actual.getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(root, expected);
 	}
 	
-	protected Collection<Password> doImportPasswords(Importer importer, String csvData) throws IOException {
+	private void testImport_SingleLine(Importer importer, String[] columns) throws Exception {
+		Model model = importPasswords(importer, columns, generateCsvRow("name1", "password1"));
+		
+		assertThat(model.getPasswords()).isNotNull().usingElementComparator(PASSWORD_COMPARATOR).containsExactly(
+				password("name1", "password1"));
+	}
+	
+	protected Model doImportPasswords(Importer importer, String csvData) throws IOException {
 		return importer.read(new StringReader(csvData));
 	}
 }

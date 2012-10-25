@@ -18,14 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.imp;
+package fr.duminy.safe.core.model;
 
-import java.io.IOException;
-import java.io.Reader;
+public class CategoryFinder implements CategoryVisitor {
+	public static Category find(Category rootCategory, String name) {
+		CategoryFinder finder = new CategoryFinder(name);
+		rootCategory.accept(finder);
+		return finder.category;
+	}
+	
+	private final String name;
+	private Category category;
+	
+	private CategoryFinder(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public void visit(Category category) {
+		if ((this.category == null) && name.equals(category.getName())) {
+			this.category = category;
+		}
+	}
 
-import fr.duminy.safe.core.model.Model;
-
-public interface Importer {
-	String getName();
-	Model read(Reader reader) throws IOException;
+	@Override
+	public void visit(Password p) {
+	}
 }

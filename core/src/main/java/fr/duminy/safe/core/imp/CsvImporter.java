@@ -22,8 +22,6 @@ package fr.duminy.safe.core.imp;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +30,9 @@ import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.duminy.safe.core.Utils;
+import fr.duminy.safe.core.model.Category;
+import fr.duminy.safe.core.model.CategoryFinder;
+import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
 
 public class CsvImporter implements Importer {
@@ -39,8 +40,10 @@ public class CsvImporter implements Importer {
     
     public static String TITLE = "TITLE";
     public static String PASSWORD = "PASSWORD";
+    public static String TYPE = "TYPE";
+    
     public static String[] REQUIRED_COLUMN_NAMES = {TITLE, PASSWORD};
-    public static String[] COLUMN_NAMES = {TITLE, "CATEGORY", "EMAIL", "USERNAME", PASSWORD, "URL", "NOTES", "OTHER", "DATE_EXPIRES","TYPE"};
+    public static String[] COLUMN_NAMES = {TITLE, "CATEGORY", "EMAIL", "USERNAME", PASSWORD, "URL", "NOTES", "OTHER", "DATE_EXPIRES", TYPE};
     
 	@Override
 	public String getName() {
@@ -48,15 +51,16 @@ public class CsvImporter implements Importer {
 	}
 
 	@Override
-	public Collection<Password> read(Reader reader) throws IOException {
+	public Model read(Reader reader) throws IOException {
 		CSVReader csvReader = null;
-		Collection<Password> passwords = new ArrayList<Password>();
+		Model model = new Model();
 		
 		try {
 		    csvReader = new CSVReader(reader);
 		    String[] nextLine;
 		    String[] headers = null;
 		    boolean readHeaders = true;
+		    Category category = null;
 		    
 		    while ((nextLine = csvReader.readNext()) != null) {
 		    	if (readHeaders) {
@@ -92,11 +96,19 @@ public class CsvImporter implements Importer {
 	    			properties.put(property, value);
 	    		}
 	    		
-	    		if (isBlank(properties, REQUIRED_COLUMN_NAMES)) {
+	    		if (isCategory(properties)) {
+	    			String name = properties.get(TITLE);
+	    			category = CategoryFinder.find(model.getRootCategory(), name);
+	    			if (category == null) {
+	    				LOG.debug("adding category {}", category);
+	    				category = new Category(name);
+	    				model.getRootCategory().add(category);
+	    			}
+	    		} else if (isBlank(properties, REQUIRED_COLUMN_NAMES)) {
 	    			LOG.debug("skipping line");
 	    		} else {
 	    			LOG.debug("adding line");
-	    			passwords.add(createPassword(properties));
+	    			model.addPassword(category, createPassword(properties));
 	    		}
 		    }
 		} finally {
@@ -106,7 +118,7 @@ public class CsvImporter implements Importer {
 			reader.close();
 		}
 		
-		return passwords;
+		return model;
 	}
 
 	private boolean isBlank(Map<String, String> properties,
@@ -116,6 +128,22 @@ public class CsvImporter implements Importer {
 			blank |= Utils.isBlank(properties.get(requiredProperty)); 
 		}
 		return blank;
+	}
+
+	private boolean isCategory(Map<String, String> properties) {
+		boolean category = true;
+		for (String property : COLUMN_NAMES) {
+			if (TITLE.equals(property) || TYPE.equals(property)) {
+				category = !Utils.isBlank(properties.get(property));
+			} else {
+				category = Utils.isBlank(properties.get(property));
+			}
+			
+			if (!category) {
+				break;
+			}
+		}
+		return category;
 	}
 	
 	private Password createPassword(Map<String, String> properties) {		

@@ -23,7 +23,6 @@ package fr.duminy.safe.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,6 +41,7 @@ import fr.duminy.safe.core.crypto.DefaultCryptoProvider;
 import fr.duminy.safe.core.crypto.Key;
 import fr.duminy.safe.core.imp.CsvImporter;
 import fr.duminy.safe.core.imp.Importer;
+import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
@@ -235,10 +235,13 @@ abstract public class Core {
         	container.stop();
         }
     }
-
+     
     public void addPassword(Password password) throws DuplicateNameException {
+    	addPassword(null, password);
+    }
+    public void addPassword(Category category, Password password) throws DuplicateNameException {
         Model model = container.getComponent(Model.class);
-        model.addPassword(password);
+        model.addPassword(category, password);
     }
 
     public void removePassword(Password password) throws DuplicateNameException {
@@ -247,8 +250,15 @@ abstract public class Core {
     }
     
     public List<Password> getPasswords() {
-        Model model = container.getComponent(Model.class);
-        return model.getPasswords();
+        return getModel().getPasswords();
+    }
+    
+    public Category getRootCategory() {
+        return getModel().getRootCategory();
+    }
+
+    public Model getModel() {
+        return container.getComponent(Model.class);
     }
     
     @Override
@@ -260,43 +270,21 @@ abstract public class Core {
     	return container.getComponents(Importer.class);
     }
     
-    public final Collection<Password> importPasswords(Importer importer, Reader reader) throws CoreException {
-    	int nbImported = 0;
-    	
+    public final Model importPasswords(Importer importer, Reader reader) throws CoreException {
     	LOG.debug("before import: core contains {} passwords. password file : {}. runtime={}", 
     			new Object[]{getPasswords().size(), getPasswordFile().exists() ?  "exists" : "doesn't exist",
     					Runtime.getRuntime()});
     	
-    	Collection<Password> passwords;
+    	Model model;
 		try {
-			passwords = importer.read(reader);
+			model = importer.read(reader);
 		} catch (IOException e) {
 			throw new CoreException("error while importing passwords", e);
 		}
-    	LOG.info("read {} passwords from importer", passwords.size());
-    	
-    	List<Password> failedPasswords = new ArrayList<Password>();
-    	for (Password password : passwords) {
-    		try {
-				addPassword(password);
-				nbImported++;
-			} catch (DuplicateNameException e) {
-				failedPasswords.add(password);
-			}
-    	}
-    	
-    	if (!failedPasswords.isEmpty()) {
-    		StringBuilder message = new StringBuilder();
-    		message.append(nbImported).append(" password(s) were imported but ");
-    		message.append(failedPasswords.size()).append(" were not.\n");
-    		message.append("(Duplicate) passwords that were not imported :\n");
-    		for (Password p : failedPasswords) {
-    			message.append(p).append("\n");
-    		}
-    		throw new CoreException(message.toString());
-    	}
-    	
-    	return passwords;
+    	LOG.info("read {} passwords from importer", model.getPasswords().size());
+
+    	getModel().add(model);
+    	return model;
     }
     
     @Override

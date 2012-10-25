@@ -46,6 +46,7 @@ public class MainPanel extends SPanel {
     private static final Logger LOG = LoggerFactory.getLogger(MainPanel.class);
     
 	private PasswordListPanel passwordList;
+	private CategoriesPanel categoriesPanel;
 	private PasswordForm passwordForm;
     	
 	public MainPanel() throws Exception {
@@ -56,9 +57,13 @@ public class MainPanel extends SPanel {
 	 */
 	public MainPanel(final SwingCore core) {
 		LOG.debug("new instance of MainPanel. callstack", new Exception("callstack"));
-		setLayout(new BorderLayout(0, 0));		
+		setLayout(new BorderLayout(0, 0));
+		
 		passwordList = new PasswordListPanel(core);
 		add(passwordList);
+		
+		categoriesPanel = new CategoriesPanel(core);
+		add(categoriesPanel, BorderLayout.WEST);
 		
 		passwordForm = new PasswordForm();
 		add(passwordForm, BorderLayout.SOUTH);
@@ -132,6 +137,7 @@ public class MainPanel extends SPanel {
 	
 	public void refresh() {
 		passwordList.refresh();
+		categoriesPanel.refresh();
 	}
 		
 	public boolean isEditing() {

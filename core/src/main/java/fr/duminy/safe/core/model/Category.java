@@ -22,6 +22,7 @@ package fr.duminy.safe.core.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Category extends Named implements Serializable {
@@ -30,8 +31,8 @@ public class Category extends Named implements Serializable {
      */
     private static final long serialVersionUID = 360495040202283307L;
     
-    private NamedList<Category> children = new NamedList<Category>();
-    private NamedList<Password> passwords = new NamedList<Password>();
+    private NamedList<Category> children = new NamedList<Category>("child");
+    private NamedList<Password> passwords = new NamedList<Password>("password");
     private Category parent;
     
     public Category() {
@@ -42,13 +43,15 @@ public class Category extends Named implements Serializable {
         super(name);
     }
 
-    public void add(Category category) {
+    public Category add(Category category) {
         category.parent = this;
         children.add(category);
+        return this;
     }
     
-    public void add(Password password) {
+    public Category add(Password password) {
         passwords.add(password);
+        return this;
     }
     
     public void accept(CategoryVisitor visitor) {
@@ -57,7 +60,7 @@ public class Category extends Named implements Serializable {
             visitor.visit(p);
         }
         for (Category c : children) {
-            visitor.visit(c);
+            c.accept(visitor);
         }
     }
 
@@ -68,23 +71,29 @@ public class Category extends Named implements Serializable {
         return v.toString();
     }
     
+    public List<Category> getPath() {
+        List<Category> path = new ArrayList<Category>();            
+        Category c = this;
+        while (c != null) {
+            path.add(c);
+            c = c.parent;
+        }
+        Collections.reverse(path);
+        return path;
+    }
+    
     private static class CategoryPrinter implements CategoryVisitor {
         private StringBuilder buffer = new StringBuilder(); 
         
         @Override
         public void visit(Category category) {
-            List<Category> path = new ArrayList<Category>();            
-            Category c = category;
-            while (c != null) {
-                path.add(c);
-                c = c.parent;
-            }
+            List<Category> path = category.getPath();            
             
-            for (int i = path.size() - 1; i >= 0; i--) {
-                buffer.append(path.get(i));
+            for (int i = 0; i < path.size(); i++) {
                 if (i > 0) {
                     buffer.append('.');
                 }
+                buffer.append(path.get(i).getName());
             }
         }
         

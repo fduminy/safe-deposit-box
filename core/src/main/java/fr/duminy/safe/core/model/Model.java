@@ -23,7 +23,9 @@ package fr.duminy.safe.core.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class Model  implements Serializable {
+import fr.duminy.safe.core.CoreException;
+
+public class Model implements Serializable {
     /**
      * 
      */
@@ -31,14 +33,17 @@ public class Model  implements Serializable {
     
     private Category rootCategory = new Category("root");
     
-    private NamedList<Password> passwords = new NamedList<Password>();
+    private NamedList<Password> passwords = new NamedList<Password>("password");
     
     public void addPassword(Password password) throws DuplicateNameException {
-        addPassword(rootCategory, password);
+        addPassword(null, password);
     }
 
     public void addPassword(Category category, Password password) throws DuplicateNameException {
         passwords.add(password);
+        if (category == null) {
+        	category = rootCategory;
+        }
         category.add(password);
     }
     
@@ -53,4 +58,12 @@ public class Model  implements Serializable {
     public Category getRootCategory() {
         return rootCategory;
     }
+
+	public void add(Model model) throws CoreException {
+		for (Password password : model.getPasswords()) {
+			addPassword(password);
+		}
+
+		rootCategory.add(model.getRootCategory());
+	}
 }

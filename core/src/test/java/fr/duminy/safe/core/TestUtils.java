@@ -23,6 +23,12 @@ package fr.duminy.safe.core;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+
+import fr.duminy.safe.core.model.Category;
+import fr.duminy.safe.core.model.Password;
+
 public class TestUtils {
     private TestUtils() {        
     }
@@ -45,5 +51,19 @@ public class TestUtils {
             data[i] = (byte) i;
         }
         return data;
+    }
+    	
+    public static Password password(String name, String password) {
+		return new Password(name, password);
+	}
+	
+    public static Category category(String name) {
+		return new Category(name);
+	}
+    
+    @SuppressWarnings("unchecked")
+	public static <T> T[] array(Collection<T> values) {    	
+    	T[] a = (T[]) Array.newInstance(values.isEmpty() ? Object.class : values.iterator().next().getClass(), values.size());
+    	return values.toArray(a);    	
     }
 }

@@ -87,7 +87,7 @@ public class PasswordListPanel extends SPanel {
 	}
 	
 	private int convertRowIndexToModel(int rowIndex) {
-		return (rowIndex < 0) ? -1 : passwordList.convertRowIndexToModel(rowIndex);
+		return ((rowIndex < 0) || (rowIndex >= passwordList.getModel().getRowCount())) ? -1 : passwordList.convertRowIndexToModel(rowIndex);
 	}
 	
 	public void addPassword(Password password) {

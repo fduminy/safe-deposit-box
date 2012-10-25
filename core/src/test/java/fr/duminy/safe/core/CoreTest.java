@@ -22,10 +22,10 @@ package fr.duminy.safe.core;
 
 
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -50,6 +50,7 @@ import fr.duminy.safe.core.crypto.Key;
 import fr.duminy.safe.core.imp.AbstractImporterTest;
 import fr.duminy.safe.core.imp.CsvImporter;
 import fr.duminy.safe.core.imp.Importer;
+import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.core.serialization.SerializerException;
@@ -154,8 +155,8 @@ public class CoreTest extends AbstractImporterTest {
 		try {
 			testImportPasswords(importer, csvData);
 			fail("must throw an exception");
-		} catch (CoreException e) {
-			assertTrue("must throw an exception for duplicate", e.getMessage().toLowerCase().contains("duplicate"));
+		} catch (DuplicateNameException e) {
+			assertThat(e).hasMessage("There is already a password with name 'pass1'");
 		}
 	}
 	
@@ -164,17 +165,18 @@ public class CoreTest extends AbstractImporterTest {
 			core.addPassword(pwd);
 		}
 		
-		Collection<Password> importedPasswords = importPasswords(importer, csvData.getColumns(), csvData.getValues());
-		assertNotNull(importedPasswords);
-		assertEquals(1, importedPasswords.size());
+		Model importedModel = importPasswords(importer, csvData.getColumns(), csvData.getValues());
+		assertNotNull(importedModel);
+		assertNotNull(importedModel.getPasswords());
+		assertEquals(1, importedModel.getPasswords().size());
 		
-		Password pwd = importedPasswords.iterator().next();
+		Password pwd = importedModel.getPasswords().iterator().next();
 		assertEquals(pwd.getName(), csvData.getValues()[0]);
 		assertEquals(pwd.getPassword(), csvData.getValues()[4]);
 	}
 	
 	@Override
-	protected Collection<Password> doImportPasswords(Importer importer, String csvData) throws Exception {
+	protected Model doImportPasswords(Importer importer, String csvData) throws Exception {
 		return core.importPasswords(importer, new StringReader(csvData));
 	}
 	

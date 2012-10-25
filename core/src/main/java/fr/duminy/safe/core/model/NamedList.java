@@ -28,14 +28,19 @@ import java.util.List;
 import java.util.Set;
 
 public class NamedList<T extends Named> extends AbstractList<T> implements Serializable {
-	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 480715143542325481L;
+	private static final long serialVersionUID = 7792630680780973576L;
+
+	private final String elementName;
 	
 	private final Set<String> names = new HashSet<String>();
 	private final List<T> list = new ArrayList<T>();
+	
+	public NamedList(String elementName) {
+		this.elementName = elementName;
+	}
 	
 	@Override
     public void add(int index, T element) {
@@ -79,10 +84,10 @@ public class NamedList<T extends Named> extends AbstractList<T> implements Seria
 			if (excludeIndex >= 0) {
 				T e = list.get(excludeIndex);
 				if ((e != null) && !e.getName().equals(element.getName())) {
-					throw new DuplicateNameException(element.getName());
+					throw new DuplicateNameException(elementName, element.getName());
 				}
 			} else {
-				throw new DuplicateNameException(element.getName());
+				throw new DuplicateNameException(elementName, element.getName());
 			}
         }
 	}

@@ -28,13 +28,13 @@ public class NamedListTest {
 
 	@Test
 	public void testAdd() {
-		NamedList<TestClass> list = new NamedList<TestClass>();
+		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
 		list.add(new TestClass("ABC"));
 	}
 	
 	@Test(expected = DuplicateNameException.class)
 	public void testAddDuplicate() {
-		NamedList<TestClass> list = new NamedList<TestClass>();
+		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
 		String name = "ABC";
 		list.add(0, new TestClass(name));
 		list.add(1, new TestClass(name));
@@ -68,7 +68,7 @@ public class NamedListTest {
 	}
 	
 	private NamedList<TestClass> createList(String... names) {
-		NamedList<TestClass> list = new NamedList<TestClass>();
+		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
 		for (String name : names) {
 			list.add(new TestClass(name));
 		}

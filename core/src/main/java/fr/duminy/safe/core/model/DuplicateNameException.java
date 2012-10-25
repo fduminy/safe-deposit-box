@@ -22,7 +22,7 @@ package fr.duminy.safe.core.model;
 
 @SuppressWarnings("serial")
 public class DuplicateNameException extends RuntimeException {
-    public DuplicateNameException(String name) {
-        super("There is already a password with name '" + name + "'");
+    public DuplicateNameException(String elementName, String name) {
+        super("There is already a " + elementName + " with name '" + name + "'");
     }
 }
