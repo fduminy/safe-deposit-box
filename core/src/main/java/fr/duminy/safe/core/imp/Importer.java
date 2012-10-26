@@ -23,9 +23,11 @@ package fr.duminy.safe.core.imp;
 import java.io.IOException;
 import java.io.Reader;
 
+import javax.swing.filechooser.FileFilter;
+
 import fr.duminy.safe.core.model.Model;
 
 public interface Importer {
-	String getName();
+	FileFilter getFileFilter();
 	Model read(Reader reader) throws IOException;
 }

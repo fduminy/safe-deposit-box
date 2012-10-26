@@ -25,23 +25,21 @@ import static fr.duminy.safe.swing.MessageKey.PASSWORD_NOT_SAVED_TITLE;
 import static fr.duminy.safe.swing.action.Action.EXIT;
 import static fr.duminy.safe.swing.action.Action.IMPORT;
 
-import java.awt.Component;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Field;
 import java.util.EventObject;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.FileChooserUI;
 
 import org.jdesktop.application.SafUtils;
@@ -103,23 +101,17 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 			    JFileChooser fileChooser = new JFileChooser();
 			    fileChooser.setMultiSelectionEnabled(true);
 			    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			    JComboBox cbxImporters = new JComboBox(new Vector<Importer>(core.getImporters()));
-			    cbxImporters.setRenderer(new DefaultListCellRenderer() {
-			    	@Override
-			    	public Component getListCellRendererComponent(
-			    			JList list, Object value, int index,
-			    			boolean isSelected, boolean cellHasFocus) {
-			    		Importer importer = (Importer) value;
-			    		super.getListCellRendererComponent(list, importer.getName(), index, isSelected,
-			    				cellHasFocus);
-			    		return this;
-			    	}
-				});
-			    fileChooser.setAccessory(cbxImporters);			    
+			    
+			    Map<FileFilter, Importer> importers = new HashMap<FileFilter, Importer>();
+			    for (Importer importer : core.getImporters()) {
+			    	importers.put(importer.getFileFilter(), importer);
+			    	fileChooser.addChoosableFileFilter(importer.getFileFilter());
+			    }
+			    
 			    initNamesForReleaseTests(fileChooser); 
 			    int result = fileChooser.showOpenDialog(getMainFrame());
 			    if (result == JFileChooser.APPROVE_OPTION) {
-			    	Importer importer = (Importer) cbxImporters.getSelectedItem();
+				    Importer importer = importers.get(fileChooser.getFileFilter());
 			    	for (File file : fileChooser.getSelectedFiles()) {
 			    		try {
 							core.importPasswords(importer, new FileReader(file));

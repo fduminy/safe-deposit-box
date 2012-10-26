@@ -25,6 +25,9 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +48,11 @@ public class CsvImporter implements Importer {
     public static String[] REQUIRED_COLUMN_NAMES = {TITLE, PASSWORD};
     public static String[] COLUMN_NAMES = {TITLE, "CATEGORY", "EMAIL", "USERNAME", PASSWORD, "URL", "NOTES", "OTHER", "DATE_EXPIRES", TYPE};
     
+    private static final FileFilter FILTER = new FileNameExtensionFilter("Secure Data Manager CSV (*.csv)", "csv");
+    
 	@Override
-	public String getName() {
-		return "Secure Data Manager CSV";
+	public FileFilter getFileFilter() {
+		return FILTER;
 	}
 
 	@Override
