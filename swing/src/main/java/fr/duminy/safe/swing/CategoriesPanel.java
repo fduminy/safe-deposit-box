@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.jdesktop.swingx.JXTree;
@@ -47,15 +46,12 @@ public class CategoriesPanel extends SPanel {
 	 */
 	public CategoriesPanel(final SwingCore core) {
 		this.core = core;
-		setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane = new JScrollPane();
-		add(scrollPane);
+		setLayout(new BorderLayout());
 		
 	    categoriesTree = new JXTree();
 	    categoriesTree.setName("categoriesTree"); //$NON-NLS-1$
-		scrollPane.setViewportView(categoriesTree);
-		
+	    add(categoriesTree, BorderLayout.CENTER);
+	    
 		refresh();
 	}
 		
