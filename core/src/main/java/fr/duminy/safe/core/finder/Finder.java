@@ -18,27 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.core.finder;
 
-/**
- * Interface that a visitor must implement to be able to visit a {@link Category}.
- * @author fabien
- *
- */
-public interface CategoryVisitor {
+import fr.duminy.safe.core.model.CategoryVisitor;
 
-	/**
-	 * Visit the given category.
-	 * @param category The category to visit.
-	 * @return true if the visit should stop, false otherwise.
-	 */
-    boolean visit(Category category);
-
-    /**
-     * Visit the given password.
-     * @param password The password to visit.
-	 * @return true if the visit should stop, false otherwise.
-     */
-    boolean visit(Password password);
-
+public interface Finder<T extends FinderResult> extends CategoryVisitor {
+	T getResult();
 }

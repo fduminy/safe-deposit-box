@@ -22,6 +22,8 @@ package fr.duminy.safe.core.imp;
 
 import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
+import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
+import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -29,8 +31,8 @@ import java.io.StringReader;
 
 import org.junit.experimental.theories.Theory;
 
+import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.model.Category;
-import fr.duminy.safe.core.model.CategoryFinder;
 import fr.duminy.safe.core.model.Model;
 
 /**
@@ -75,7 +77,7 @@ public class ImporterTest extends AbstractImporterTest {
 		assertThat(model.getRootCategory()).isEqualsToByComparingFields(root);
 		
 		Category expected = category("messagerie");
-		Category actual = CategoryFinder.find(model.getRootCategory(), expected.getName()); 
+		Category actual = Finders.findCategory(model.getRootCategory(), expected.getName()).getFoundCategory(); 
 		assertThat(actual).isEqualsToByComparingFields(expected);		
 		assertThat(actual.getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(root, expected);
 	}

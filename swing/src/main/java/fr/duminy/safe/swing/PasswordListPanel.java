@@ -22,12 +22,14 @@ package fr.duminy.safe.swing;
 
 import java.awt.BorderLayout;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXTable;
 
+import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.action.Action;
 import fr.duminy.safe.swing.command.Command;
@@ -35,6 +37,7 @@ import fr.duminy.safe.swing.command.Command;
 @SuppressWarnings("serial")
 public class PasswordListPanel extends SPanel {
 	private final JXTable passwordList;
+	private final PasswordTableModel model;
 	private final SwingCore core;
 
 	public PasswordListPanel() throws Exception {
@@ -50,7 +53,8 @@ public class PasswordListPanel extends SPanel {
 		
 		JScrollPane scrollPane = new JScrollPane();
 		add(scrollPane);
-		passwordList = new JXTable(new PasswordTableModel(core));
+		model = new PasswordTableModel(core.getPasswords());
+		passwordList = new JXTable(model);
 		passwordList.setName("passwordList"); //$NON-NLS-1$
 		scrollPane.setViewportView(passwordList);
 		
@@ -66,11 +70,11 @@ public class PasswordListPanel extends SPanel {
 					int row = 0;
 					for (int i = rows.length - 1; i >= 0; i--) {
 						row = rows[i]; 
-						Password pwd = core.getPasswords().get(row);
+						Password pwd = model.getPasswords().get(row);
 						core.removePassword(pwd);
 					}
 					
-					((PasswordTableModel) passwordList.getModel()).fireTableRowsDeleted(rows[0], rows[rows.length - 1]);
+					model.removePasswords(rows);
 					
 					row = (row > 0) ? (row - 1) : 0;
 					passwordList.getSelectionModel().setSelectionInterval(row , row);
@@ -82,30 +86,34 @@ public class PasswordListPanel extends SPanel {
 	public void addListSelectionListener(ListSelectionListener listener) {
 		passwordList.getSelectionModel().addListSelectionListener(listener);
 	}
-	public int getSelectedRow() {
-		return convertRowIndexToModel(passwordList.getSelectedRow());
+	public Password getSelectedPassword() {
+		int pwdIndex = convertRowIndexToModel(passwordList.getSelectedRow());
+		Password password = null;
+		if ((pwdIndex >= 0) && (pwdIndex < model.getPasswords().size())) {
+			password = model.getPasswords().get(pwdIndex);
+		}
+		return password;
 	}
 	
 	private int convertRowIndexToModel(int rowIndex) {
-		return ((rowIndex < 0) || (rowIndex >= passwordList.getModel().getRowCount())) ? -1 : passwordList.convertRowIndexToModel(rowIndex);
+		return ((rowIndex < 0) || (rowIndex >= model.getRowCount())) ? -1 : passwordList.convertRowIndexToModel(rowIndex);
 	}
 	
-	public void addPassword(Password password) {
-		int row = core.getPasswords().size();
-		core.addPassword(password);
-		((PasswordTableModel) passwordList.getModel()).fireTableRowsInserted(row, row);
-		passwordList.getSelectionModel().setSelectionInterval(row , row);
+	public void addPassword(Category category, Password password) {
+		core.addPassword(category, password);
+		model.addPassword(password);
+		int row = model.getRowCount() - 1;
+		passwordList.getSelectionModel().setSelectionInterval(row, row);
 	}
 
 	public void updatePassword(Password password) {
-		//int row = core.getPasswords().indexOf(password);
 		int row = passwordList.getSelectionModel().getMinSelectionIndex();
 		core.getPasswords().set(row, password);
-		((PasswordTableModel) passwordList.getModel()).fireTableRowsUpdated(row, row);
-		passwordList.getSelectionModel().setSelectionInterval(row , row);
+		model.fireTableRowsUpdated(row, row);
+		passwordList.getSelectionModel().setSelectionInterval(row, row);
 	}
 	
-	public void refresh() {
-		((PasswordTableModel) passwordList.getModel()).fireTableDataChanged();		
+	public void refresh(List<Password> passwords) {
+		model.setPasswords(passwords);		
 	}
 }

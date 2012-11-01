@@ -23,6 +23,8 @@ package fr.duminy.safe.swing;
 import static fr.duminy.safe.swing.MessageKey.NAME;
 import static fr.duminy.safe.swing.MessageKey.PASSWORD;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -31,10 +33,10 @@ import fr.duminy.safe.core.model.Password;
 
 @SuppressWarnings("serial")
 public class PasswordTableModel extends AbstractTableModel {
-	private final SwingCore core;
+	private List<Password> passwords;
 	
-	public PasswordTableModel(SwingCore core) {
-		this.core = core;
+	public PasswordTableModel(List<Password> passwords) {
+		setPasswords(passwords);
 	}
 	
 	@Override
@@ -72,7 +74,33 @@ public class PasswordTableModel extends AbstractTableModel {
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 	}
 	
-	private List<Password> getPasswords() {
-		return core.getPasswords();
+	public void setPasswords(List<Password> passwords) {
+		this.passwords = (passwords == null) ? new ArrayList<Password>() : passwords;
+		fireTableDataChanged();
+	}
+
+	public List<Password> getPasswords() {
+		return passwords;
+	}
+
+	public void addPassword(Password password) {
+		getPasswords().add(password);
+		int row = getPasswords().size() - 1;
+		fireTableRowsInserted(row, row);
+	}
+
+	public void removePassword(int rowIndex) {
+		getPasswords().remove(rowIndex);
+		fireTableRowsDeleted(rowIndex, rowIndex);
+	}
+
+	public void removePasswords(int[] rowIndexes) {
+		Arrays.sort(rowIndexes);
+
+		for (int i = rowIndexes.length - 1; i >= 0; i--) {
+			getPasswords().remove(rowIndexes[i]);
+		}
+
+		fireTableRowsDeleted(rowIndexes[0], rowIndexes[rowIndexes.length - 1]);
 	}
 }

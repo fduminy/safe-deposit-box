@@ -39,7 +39,7 @@ public class CategoryNode extends AbstractMutableTreeTableNode {
 		return 1;
 	}
 
-	private Category getCategory() {
+	public Category getCategory() {
 		return (Category)getUserObject();
 	}
 	

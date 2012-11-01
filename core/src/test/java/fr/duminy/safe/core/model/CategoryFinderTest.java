@@ -29,15 +29,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class CategoryFinderTest {
-	private static String ROOT_NAME = "root";
-	private static String CHILD_NAME = "child";
-	private static String WRONG_NAME = "wrong name";
-	
+import fr.duminy.safe.core.finder.Finders;
+
+public class CategoryFinderTest extends AbstractFinderTest {
 	@Test
 	public void testFindRoot() {
 		Category root = buildCategoryTree();		
-		Category result = CategoryFinder.find(root, ROOT_NAME);
+		Category result = Finders.findCategory(root, ROOT.getCategoryName()).getFoundCategory();
 		
 		assertThat(result).isNotNull().isEqualsToByComparingFields(root);
 	}
@@ -45,15 +43,15 @@ public class CategoryFinderTest {
 	@Test
 	public void testFindChild() {
 		Category root = buildCategoryTree();	
-		Category result = CategoryFinder.find(root, CHILD_NAME);
+		Category result = Finders.findCategory(root, CHILD.getCategoryName()).getFoundCategory();
 		
-		assertThat(result).isNotNull().isEqualsToByComparingFields(category(CHILD_NAME));
+		assertThat(result).isNotNull().isEqualsToByComparingFields(category(CHILD.getCategoryName()));
 	}
 
 	@Test
 	public void testFindWrongName() {
 		Category root = buildCategoryTree();		
-		Category result = CategoryFinder.find(root, WRONG_NAME);
+		Category result = Finders.findCategory(root, WRONG_NAME).getFoundCategory();
 		
 		assertThat(result).isNull();
 	}
@@ -68,23 +66,8 @@ public class CategoryFinderTest {
 	@Test
 	public void testGetPathChild() {
 		List<Category> categories = new ArrayList<Category>();
-		buildCategoryTree(categories);
+		buildCategoryTree(categories, null);
 		
 		assertThat(categories.get(1).getPath()).isNotNull().containsExactly(array(categories));
-	}
-
-	private Category buildCategoryTree() {
-		return buildCategoryTree(null);
-	}
-	private Category buildCategoryTree(List<Category> categories) {
-		Category child = category(CHILD_NAME);
-		Category root = category(ROOT_NAME).add(child);
-		
-		if (categories != null) {
-			categories.add(root);
-			categories.add(child);
-		}
-		
-		return root;
 	}
 }

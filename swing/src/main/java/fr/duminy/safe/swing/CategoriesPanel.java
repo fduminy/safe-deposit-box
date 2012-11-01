@@ -25,7 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.JXTree;
 
@@ -50,11 +52,16 @@ public class CategoriesPanel extends SPanel {
 		
 	    categoriesTree = new JXTree();
 	    categoriesTree.setName("categoriesTree"); //$NON-NLS-1$
+	    categoriesTree.setShowsRootHandles(false);
 	    add(categoriesTree, BorderLayout.CENTER);
 	    
 		refresh();
 	}
-		
+	
+	public void addTreeSelectionListener(TreeSelectionListener listener) {
+		categoriesTree.getSelectionModel().addTreeSelectionListener(listener);
+	}
+	
 	public void refresh() {
 		DefaultTreeModel model = (DefaultTreeModel) categoriesTree.getModel();
 				
@@ -66,21 +73,27 @@ public class CategoriesPanel extends SPanel {
 		
 		core.getRootCategory().accept(new CategoryVisitor() {
 			@Override
-			public void visit(Password p) {
-				// TODO Auto-generated method stub
-				
+			public boolean visit(Password p) {
+				return true;
 			}
 			
 			@Override
-			public void visit(Category category) {
+			public boolean visit(Category category) {
 				List<Category> path = category.getPath();
 				if (path.size() > 1) {
 					CategoryNode parentNode = categoryToNode.get(path.get(path.size() - 2));
 					CategoryNode node = new CategoryNode(category);
 					categoryToNode.put(category, node);
 					parentNode.add(node);					
-				}				
+				}
+				return true;
 			}
 		});
+	}
+	
+	public Category getSelectedCategory() {
+		TreePath path = categoriesTree.getSelectionPath();
+		CategoryNode node = (CategoryNode) path.getLastPathComponent();
+		return node.getCategory();
 	}
 }

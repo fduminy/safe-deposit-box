@@ -24,7 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.StringWriter;
-import java.util.Comparator;
 
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -32,33 +31,13 @@ import org.junit.runner.RunWith;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.duminy.safe.core.CoreTest.FakeCore;
-import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Model;
-import fr.duminy.safe.core.model.Password;
 
 @RunWith(Theories.class)
 abstract public class AbstractImporterTest {
 	@DataPoints public static final Importer[] IMPORTERS = new FakeCore().getImporters().toArray(new Importer[0]);
 		
 	protected static final String[] REQUIRED_COLUMNS = CsvImporter.COLUMN_NAMES;
-	
-	protected static final Comparator<Password> PASSWORD_COMPARATOR = new Comparator<Password>() {
-		@Override
-		public int compare(Password o1, Password o2) {
-			int result = o1.getName().compareTo(o2.getName());
-			if (result == 0) {
-				 result = o1.getPassword().compareTo(o2.getPassword());
-			}
-			return result;
-		}			
-	};
-
-	protected static final Comparator<Category> CATEGORY_COMPARATOR = new Comparator<Category>() {
-		@Override
-		public int compare(Category o1, Category o2) {
-			return o1.getName().compareTo(o2.getName());
-		}			
-	};
 	
 	protected final static String[] generateCsvRow(String name, String password) {
 		return new String[]{name, "", "", "", password, "", "", "", "", ""};		

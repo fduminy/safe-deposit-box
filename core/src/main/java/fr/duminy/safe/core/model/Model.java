@@ -21,9 +21,13 @@
 package fr.duminy.safe.core.model;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import fr.duminy.safe.core.CoreException;
+import fr.duminy.safe.core.finder.Finders;
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 public class Model implements Serializable {
     /**
@@ -48,11 +52,17 @@ public class Model implements Serializable {
     }
     
     public void removePassword(Password password) {
+        PasswordFinderResult result = Finders.findPassword(rootCategory, password.getName(), true);
+    	
         passwords.remove(password);
+        for (PasswordWithPath pwd : result.getPasswordsWithPath()) {
+        	Category parent = pwd.getPath().get(pwd.getPath().size() - 1);
+        	parent.remove(password);
+        }
     }
 
     public List<Password> getPasswords() {
-        return passwords;
+        return Collections.unmodifiableList(passwords);
     }
 
     public Category getRootCategory() {
@@ -63,7 +73,5 @@ public class Model implements Serializable {
 		for (Password password : model.getPasswords()) {
 			addPassword(password);
 		}
-
-		rootCategory.add(model.getRootCategory());
 	}
 }

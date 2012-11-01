@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.duminy.safe.core.Utils;
+import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.model.Category;
-import fr.duminy.safe.core.model.CategoryFinder;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
 
@@ -103,7 +103,7 @@ public class CsvImporter implements Importer {
 	    		
 	    		if (isCategory(properties)) {
 	    			String name = properties.get(TITLE);
-	    			category = CategoryFinder.find(model.getRootCategory(), name);
+	    			category = Finders.findCategory(model.getRootCategory(), name).getFoundCategory();
 	    			if (category == null) {
 	    				LOG.debug("adding category {}", category);
 	    				category = new Category(name);

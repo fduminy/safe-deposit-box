@@ -95,7 +95,6 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
 			}
 		});		
 		support.addCommand(new Command(IMPORT) {		
-			@SuppressWarnings("serial")
 			@Override
 			public void run() {
 			    JFileChooser fileChooser = new JFileChooser();

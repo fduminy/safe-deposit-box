@@ -49,21 +49,48 @@ public class Category extends Named implements Serializable {
         return this;
     }
     
-    public Category add(Password password) {
+    Category add(Password password) {
         passwords.add(password);
         return this;
     }
     
-    public void accept(CategoryVisitor visitor) {
-        visitor.visit(this);
-        for (Password p : passwords) {
-            visitor.visit(p);
-        }
-        for (Category c : children) {
-            c.accept(visitor);
-        }
+	void remove(Password password) {
+		passwords.remove(password);
+	}
+    
+    public boolean accept(CategoryVisitor visitor) {
+    	return acceptImpl(visitor, true);
     }
 
+    /**
+     * 
+     * @param visitor
+     * @param topCategory The ancestor of all being visited categories. It's not necessarily the root category but it's the first category being visited. 
+     * @return
+     */
+    private boolean acceptImpl(CategoryVisitor visitor, boolean topCategory) {
+        boolean go = visitor.visit(this);
+        if (!topCategory && !go) {
+        	return false;
+        }
+        
+        for (Password p : passwords) {
+            if (!topCategory && !go) {
+            	return false;
+            }
+            go = visitor.visit(p);
+        }
+        
+        for (Category c : children) {
+            if (!topCategory && !go) {
+            	return false;
+            }
+        	go = c.acceptImpl(visitor, false);
+        }
+        
+        return true;
+    }
+    
     @Override
     public String toString() {
         CategoryPrinter v = new CategoryPrinter(); 
@@ -86,7 +113,7 @@ public class Category extends Named implements Serializable {
         private StringBuilder buffer = new StringBuilder(); 
         
         @Override
-        public void visit(Category category) {
+        public boolean visit(Category category) {
             List<Category> path = category.getPath();            
             
             for (int i = 0; i < path.size(); i++) {
@@ -95,17 +122,18 @@ public class Category extends Named implements Serializable {
                 }
                 buffer.append(path.get(i).getName());
             }
+            return true;
         }
         
         @Override
-        public void visit(Password p) {
+        public boolean visit(Password p) {
             buffer.append(p);
+            return true;
         }
         
         @Override
         public String toString() {
             return buffer.toString();
         }
-    }
-    
+    }    
 }

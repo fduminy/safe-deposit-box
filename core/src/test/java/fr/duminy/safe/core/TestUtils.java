@@ -25,7 +25,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
+import org.junit.Assert;
+
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
 
@@ -33,7 +38,66 @@ public class TestUtils {
     private TestUtils() {        
     }
         
-    public static void assertArrayNotEquals(String message, byte[] expected,
+    private static final class PasswordComparator implements Comparator<Password> {
+		@Override
+		public int compare(Password o1, Password o2) {
+			int result = o1.getName().compareTo(o2.getName());
+			if (result == 0) {
+				 result = o1.getPassword().compareTo(o2.getPassword());
+			}
+			return result;
+		}			
+	};
+    public static final PasswordComparator PASSWORD_COMPARATOR = new PasswordComparator();
+
+    private static final class PasswordWithPathComparator implements Comparator<PasswordWithPath> {
+		@Override
+		public int compare(PasswordWithPath o1, PasswordWithPath o2) {
+			int result = PASSWORD_COMPARATOR.compare(o1.getPassword(), o2.getPassword());
+			if (result == 0) {
+				List<Category> path1 = o1.getPath();
+				List<Category> path2 = o2.getPath();
+				if (path1.size() != path2.size()) {
+					result = path1.size() - path2.size();
+				} else {
+					for (int i = 0; i < path1.size(); i++) {
+						Category category1 = path1.get(i);
+						Category category2 = path2.get(i);
+						result = CATEGORY_COMPARATOR.compare(category1, category2);
+						if (result != 0) {
+							break;
+						}
+					}
+				}
+			}
+			return result;
+		}			
+	};
+    public static final PasswordWithPathComparator PASSWORD_WITH_PATH_COMPARATOR = new PasswordWithPathComparator();
+    
+    private static final class CategoryComparator implements Comparator<Category>  {
+		@Override
+		public int compare(Category o1, Category o2) {
+			return o1.getName().compareTo(o2.getName());
+		}			
+	};
+	public static final CategoryComparator CATEGORY_COMPARATOR = new CategoryComparator();
+	    
+	public static String[] join(String[]... arrays) {
+		int size = 0;
+		for (String[] array : arrays) {
+			size += array.length;
+		}
+		String[] result = new String[size];
+		int i = 0;
+		for (String[] array : arrays) {
+			System.arraycopy(array, 0, result, i, array.length);
+			i += array.length;
+		}
+		return result;
+	}
+	
+	public static void assertArrayNotEquals(String message, byte[] expected,
             byte[] actual) {
         boolean equal;
         try {
@@ -65,5 +129,20 @@ public class TestUtils {
 	public static <T> T[] array(Collection<T> values) {    	
     	T[] a = (T[]) Array.newInstance(values.isEmpty() ? Object.class : values.iterator().next().getClass(), values.size());
     	return values.toArray(a);    	
+    }
+    
+    /**
+     * TODO use FEST assert 2.9-SNAPSHOT or more, supporting this kid of assertion.
+     * @param list
+     */
+    public static <T> void assertThatIsUnmodifiable(List<T> list) {
+    	if (list != null) {
+	    	try {
+	    		list.clear();
+	    		Assert.fail("list must not be modifiable");
+	    	} catch(UnsupportedOperationException uoe) {
+	    		return;
+	    	}
+    	}
     }
 }

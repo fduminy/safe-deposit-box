@@ -18,30 +18,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.core.finder;
 
-public class CategoryFinder implements CategoryVisitor {
-	public static Category find(Category rootCategory, String name) {
-		CategoryFinder finder = new CategoryFinder(name);
-		rootCategory.accept(finder);
-		return finder.category;
-	}
-	
+import fr.duminy.safe.core.finder.CategoryFinder.CategoryFinderResult;
+import fr.duminy.safe.core.model.Category;
+import fr.duminy.safe.core.model.Password;
+
+class CategoryFinder implements Finder<CategoryFinderResult> {
 	private final String name;
 	private Category category;
 	
-	private CategoryFinder(String name) {
+	CategoryFinder(String name) {
 		this.name = name;
 	}
 	
 	@Override
-	public void visit(Category category) {
+	public boolean visit(Category category) {
 		if ((this.category == null) && name.equals(category.getName())) {
 			this.category = category;
 		}
+		return true;
 	}
 
 	@Override
-	public void visit(Password p) {
+	public boolean visit(Password p) {
+		return true;
+	}
+
+	@Override
+	public CategoryFinderResult getResult() {
+		return new CategoryFinderResult();
+	}
+	
+	public class CategoryFinderResult implements FinderResult {
+		public Category getFoundCategory() {
+			return category;
+		}
 	}
 }

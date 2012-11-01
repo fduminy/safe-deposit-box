@@ -42,6 +42,15 @@ public class Named implements Serializable {
     }
 
     @Override
+    public boolean equals(Object other) {
+    	if (!(other instanceof Named)) {
+    		return false;
+    	}
+    	
+    	return ((Named) other).name.equals(name);
+    }
+    
+    @Override
     public String toString() {
         return "Named [name=" + name + "]";
     }

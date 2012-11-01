@@ -20,6 +20,11 @@
  */
 package fr.duminy.safe.core.model;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import fr.duminy.safe.core.TestClass;
@@ -29,49 +34,92 @@ public class NamedListTest {
 	@Test
 	public void testAdd() {
 		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
-		list.add(new TestClass("ABC"));
+		TestClass tc = new TestClass("ABC");
+		
+		list.add(tc);
+		
+		assertThat(list).containsExactly(tc);
 	}
 	
-	@Test(expected = DuplicateNameException.class)
+	@Test
 	public void testAddDuplicate() {
 		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
 		String name = "ABC";
-		list.add(0, new TestClass(name));
-		list.add(1, new TestClass(name));
+		
+		list.add(0, new TestClass(name));		
+		
+		try {
+			list.add(1, new TestClass(name));
+		} catch (Throwable t) {
+			assertThat(t).isInstanceOf(DuplicateNameException.class);
+		}
 	}
 
-	@Test
-	public void testRemove() {
-		NamedList<TestClass> list = createList("ABC", "DEF");
-		list.remove(1);
-		list.remove(0);
-	}
+    @Test
+    public void testRemove_DifferentName() {
+    	testRemove(false, false);
+    }
+
+    @Test
+    public void testRemove_SameInstance() {
+    	testRemove(true, true);
+    }
+
+    @Test
+    public void testRemove_DifferentInstance() {
+    	testRemove(true, false);
+    }
+    
+    private void testRemove(boolean sameName, boolean sameTestClassInstance) {
+    	List<TestClass> createdTestClasses = new ArrayList<TestClass>();
+		NamedList<TestClass> list = createList(createdTestClasses, "ABC", "DEF");
+		TestClass tc1 = createdTestClasses.get(0);
+		TestClass tc2 = createdTestClasses.get(1);
+		
+    	TestClass tcToRemove = sameTestClassInstance ? tc1 : testClass(sameName ? tc1.getName() : "wrongName");
+		list.remove(tcToRemove);
+
+    	if (sameName || sameTestClassInstance) {
+    		assertThat(list).containsExactly(tc2);
+    	} else {
+    		assertThat(list).containsExactly(tc1, tc2);
+    	}
+    }
 	
 	@Test
 	public void testSet() {
-		NamedList<TestClass> list = createList("ABC", "DEF");
+		NamedList<TestClass> list = createList(null, "ABC", "DEF");
 		list.set(1, new TestClass("UVW"));
 	}
 	
 	@Test(expected = DuplicateNameException.class)
 	public void testSetDuplicate() {
 		String abc = "ABC";
-		NamedList<TestClass> list = createList(abc, "DEF");
+		NamedList<TestClass> list = createList(null, abc, "DEF");
 		list.set(1, new TestClass(abc));
 	}
 	
 	@Test
 	public void testSetReplaceWithSameName() {
 		String abc = "ABC";
-		NamedList<TestClass> list = createList(abc, "DEF");
+		NamedList<TestClass> list = createList(null, abc, "DEF");
 		list.set(0, new TestClass(abc));
 	}
 	
-	private NamedList<TestClass> createList(String... names) {
+	private NamedList<TestClass> createList(List<TestClass> createdTestClasses, String... names) {
 		NamedList<TestClass> list = new NamedList<TestClass>("TestClass");
 		for (String name : names) {
-			list.add(new TestClass(name));
+			TestClass tc = testClass(name); 
+			list.add(tc);
+			
+			if (createdTestClasses != null) {
+				createdTestClasses.add(tc);
+			}
 		}
 		return list;
+	}
+	
+	private TestClass testClass(String name) {
+		return new TestClass(name);
 	}
 }

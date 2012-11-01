@@ -24,12 +24,12 @@ import java.io.Serializable;
 
 
 public class Password extends Named implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7853775945883397991L;
-    
-    private final String password;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6175762074911013853L;
+	
+	private final String password;
 
     public Password(String name, String password) {
         super(name);
@@ -39,10 +39,10 @@ public class Password extends Named implements Serializable {
     public String getPassword() {
         return password;
     }
-
+    
     @Override
     public String toString() {
-        return "Password [password=" + password + ", getName()=" + getName()
+        return "Password [password=" + password + ", name=" + getName()
                 + "]";
     }
 }

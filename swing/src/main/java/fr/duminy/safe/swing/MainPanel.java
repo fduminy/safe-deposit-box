@@ -28,15 +28,20 @@ import static fr.duminy.safe.swing.action.Action.REMOVE_PASSWORD;
 import static fr.duminy.safe.swing.action.Action.UPDATE_PASSWORD;
 
 import java.awt.BorderLayout;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.duminy.safe.core.finder.Finders;
+import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.DuplicateNameException;
 import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.command.Command;
@@ -91,20 +96,24 @@ public class MainPanel extends SPanel {
 		exitButton.setName("exitButton"); //$NON-NLS-1$
 		toolBar.add(exitButton);
 		
+		categoriesPanel.addTreeSelectionListener(new TreeSelectionListener() {			
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				Category c = categoriesPanel.getSelectedCategory();
+				List<Password> passwords = Finders.findPassword(c, null, false).getPasswords();
+				passwordList.refresh(passwords);
+			}
+		});
+		
 		passwordList.addListSelectionListener(new ListSelectionListener() {			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {				
 				if (!e.getValueIsAdjusting()) {
-					int pwdIndex = passwordList.getSelectedRow();
-					boolean canRemove = (pwdIndex >= 0);
+					Password pwd = passwordList.getSelectedPassword();
+					boolean canRemove = (pwd != null);
 					REMOVE_PASSWORD.setEnabled(canRemove);
 					
 					if (!passwordForm.isEditing()) {
-						Password pwd = null;
-						if ((pwdIndex >= 0) && (pwdIndex < core.getPasswords().size())) {
-							pwd = core.getPasswords().get(pwdIndex);
-						}
-						
 						passwordForm.viewPassword(pwd);
 					}
 				}
@@ -117,7 +126,8 @@ public class MainPanel extends SPanel {
 				Password password = passwordForm.getPassword();
 				LOG.info("{} {}", ADD_PASSWORD, password); //$NON-NLS-1$
 				try {
-					passwordList.addPassword(password);
+					Category c = categoriesPanel.getSelectedCategory();
+					passwordList.addPassword(c, password);
 					passwordForm.viewPassword(password);
 				} catch (DuplicateNameException dne) {
 					core.displayError(dne.getMessage(), dne);
@@ -136,7 +146,7 @@ public class MainPanel extends SPanel {
 	}
 	
 	public void refresh() {
-		passwordList.refresh();
+		passwordList.refresh(null);
 		categoriesPanel.refresh();
 	}
 		
