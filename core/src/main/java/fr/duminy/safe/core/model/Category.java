@@ -43,6 +43,11 @@ public class Category extends Named implements Serializable {
         super(name);
     }
 
+    /**
+     * TODO make this non-public because, like {@link #add(Password)}, it doesn't force to modify the list of passwords in {@link Model}. 
+     * @param category
+     * @return
+     */
     public Category add(Category category) {
         category.parent = this;
         children.add(category);
