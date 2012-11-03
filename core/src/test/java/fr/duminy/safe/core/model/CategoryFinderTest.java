@@ -23,7 +23,10 @@ package fr.duminy.safe.core.model;
 import static fr.duminy.safe.core.TestUtils.array;
 import static fr.duminy.safe.core.TestUtils.category;
 import static org.fest.assertions.api.Assertions.assertThat;
-
+import static fr.duminy.safe.core.TestDataUtils.ROOT;
+import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
+import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +34,7 @@ import org.junit.Test;
 
 import fr.duminy.safe.core.finder.Finders;
 
-public class CategoryFinderTest extends AbstractFinderTest {
+public class CategoryFinderTest {
 	@Test
 	public void testFindRoot() {
 		Category root = buildCategoryTree();		

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.model;
+package fr.duminy.safe.core;
 
 import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
@@ -26,19 +26,32 @@ import static fr.duminy.safe.core.TestUtils.password;
 import java.util.List;
 import java.util.Map;
 
-abstract class AbstractFinderTest {
-	protected static String WRONG_NAME = "wrong name";
-		
-	protected static Node ROOT = node("root", 2);
-	protected static Node CHILD = node("child", 2);
+import fr.duminy.safe.core.model.Category;
+import fr.duminy.safe.core.model.Model;
+import fr.duminy.safe.core.model.Password;
 
-	protected Category buildCategoryTree() {
+public class TestDataUtils {
+	public static String WRONG_NAME = "wrong name";
+	
+	private static String ROOT_NAME = "root";	
+	public static Node ROOT = node(ROOT_NAME, 2);
+	public static Node CHILD = node("child", 2);
+
+	public static Model buildModel() {
+		return buildModel(null, null);
+	}
+	
+	public static Category buildCategoryTree() {
 		return buildCategoryTree(null, null);
 	}
-	protected Category buildCategoryTree(List<Category> categories, Map<String, Category> categoriesMap) {
-		Category child = buildCategory(CHILD);
-		Category root = buildCategory(ROOT);
-		root.add(child);
+	public static Category buildCategoryTree(List<Category> categories, Map<String, Category> categoriesMap) {
+		return buildModel(categories, categoriesMap).getRootCategory();
+	}
+
+	private static Model buildModel(List<Category> categories, Map<String, Category> categoriesMap) {
+		Model model = new Model();		
+		Category child = buildCategory(model, CHILD);
+		Category root = buildCategory(model, ROOT);
 		
 		if (categories != null) {
 			categories.add(root);
@@ -49,26 +62,35 @@ abstract class AbstractFinderTest {
 			categoriesMap.put(root.getName(), root);
 			categoriesMap.put(child.getName(), child);
 		}
-		
-		return root;
-	}
 
-	protected Category buildCategory(Node node) {
-		Category category = category(node.getCategoryName());
+		return model;
+	}
+	
+	private static Category buildCategory(Model model, Node node) {
+		Category category;
+		if (node.getCategoryName() == ROOT_NAME) {
+			category = model.getRootCategory();
+		} else {
+			category = category(node.getCategoryName());
+			model.getRootCategory().add(category);
+		}
+		
 		for (String name : node.getPasswordNames()) {
-			category.add(password(name, name + "_pwd"));
+			Password password = password(name, name + "_pwd");			
+			model.addPassword(category, password);
 		}
 		return category;
 		
 	}
 
-	public static Node node(String categoryName, int nbPasswords) {
+	private static Node node(String categoryName, int nbPasswords) {
 		String[] passwordNames = new String[nbPasswords];
 		for (int i = 0;  i < nbPasswords; i++) {
 			passwordNames[i] = categoryName + "PasswordName" + i;
 		}
 		return node(categoryName, passwordNames);
 	}
+	
 	public static Node node(String categoryName, String... passwordNames) {
 		return new Node(categoryName, passwordNames);
 	}
@@ -81,10 +103,10 @@ abstract class AbstractFinderTest {
 			this.passwordNames = passwordNames;
 			this.categoryName = categoryName;
 		}
-		String[] getPasswordNames() {
+		public String[] getPasswordNames() {
 			return passwordNames;
 		}
-		String getCategoryName() {
+		public String getCategoryName() {
 			return categoryName;
 		}
 	}

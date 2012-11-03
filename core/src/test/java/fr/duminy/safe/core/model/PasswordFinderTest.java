@@ -24,6 +24,12 @@ import static fr.duminy.safe.core.TestUtils.join;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
 import static fr.duminy.safe.core.finder.Finders.getPasswords;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static fr.duminy.safe.core.TestDataUtils.ROOT;
+import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
+import static fr.duminy.safe.core.TestDataUtils.Node;
+import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
+import static fr.duminy.safe.core.TestDataUtils.node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +46,7 @@ import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 @RunWith(Theories.class)
-public class PasswordFinderTest extends AbstractFinderTest {
+public class PasswordFinderTest  {
 	@DataPoint public static final Data ROOT_PASSWORD = data(ROOT, true, true);
 	@DataPoint public static final Data CHILD_PASSWORD = data(CHILD, true, true);
 	@DataPoint public static final Data ROOT_PASSWORD_NON_RECURSIVE = data(ROOT, true, false);
