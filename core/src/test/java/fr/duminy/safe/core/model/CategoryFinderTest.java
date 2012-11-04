@@ -36,27 +36,39 @@ import fr.duminy.safe.core.finder.Finders;
 
 public class CategoryFinderTest {
 	@Test
+	public void testFindAll() {
+		Category root = buildCategoryTree();		
+		List<Category> result = Finders.findCategory(root, null).getFoundCategories();
+		
+		assertThat(result).isNotNull().containsExactly(root, child());
+	}
+	
+	@Test
 	public void testFindRoot() {
 		Category root = buildCategoryTree();		
-		Category result = Finders.findCategory(root, ROOT.getCategoryName()).getFoundCategory();
+		List<Category> result = Finders.findCategory(root, ROOT.getCategoryName()).getFoundCategories();
 		
-		assertThat(result).isNotNull().isEqualsToByComparingFields(root);
+		assertThat(result).isNotNull().containsExactly(root);
 	}
 	
 	@Test
 	public void testFindChild() {
 		Category root = buildCategoryTree();	
-		Category result = Finders.findCategory(root, CHILD.getCategoryName()).getFoundCategory();
+		List<Category> result = Finders.findCategory(root, CHILD.getCategoryName()).getFoundCategories();
 		
-		assertThat(result).isNotNull().isEqualsToByComparingFields(category(CHILD.getCategoryName()));
+		assertThat(result).isNotNull().containsExactly(child());
 	}
 
+	private Category child() {
+		return category(CHILD.getCategoryName());
+	}
+	
 	@Test
 	public void testFindWrongName() {
 		Category root = buildCategoryTree();		
-		Category result = Finders.findCategory(root, WRONG_NAME).getFoundCategory();
+		List<Category> result = Finders.findCategory(root, WRONG_NAME).getFoundCategories();
 		
-		assertThat(result).isNull();
+		assertThat(result).isNotNull().isEmpty();
 	}
 	
 	@Test

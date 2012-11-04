@@ -20,13 +20,16 @@
  */
 package fr.duminy.safe.core.finder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.duminy.safe.core.finder.CategoryFinder.CategoryFinderResult;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
 
 class CategoryFinder implements Finder<CategoryFinderResult> {
 	private final String name;
-	private Category category;
+	private final List<Category> categories = new ArrayList<Category>();
 	
 	CategoryFinder(String name) {
 		this.name = name;
@@ -34,8 +37,8 @@ class CategoryFinder implements Finder<CategoryFinderResult> {
 	
 	@Override
 	public boolean visit(Category category) {
-		if ((this.category == null) && name.equals(category.getName())) {
-			this.category = category;
+		if ((name == null) || name.equals(category.getName())) {
+			categories.add(category);
 		}
 		return true;
 	}
@@ -51,8 +54,8 @@ class CategoryFinder implements Finder<CategoryFinderResult> {
 	}
 	
 	public class CategoryFinderResult implements FinderResult {
-		public Category getFoundCategory() {
-			return category;
+		public List<Category> getFoundCategories() {
+			return categories;
 		}
 	}
 }

@@ -23,6 +23,7 @@ package fr.duminy.safe.core.imp;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.filechooser.FileFilter;
@@ -103,7 +104,8 @@ public class CsvImporter implements Importer {
 	    		
 	    		if (isCategory(properties)) {
 	    			String name = properties.get(TITLE);
-	    			category = Finders.findCategory(model.getRootCategory(), name).getFoundCategory();
+	    			List<Category> categories = Finders.findCategory(model.getRootCategory(), name).getFoundCategories(); 
+	    			category = categories.isEmpty() ? null : categories.get(0);
 	    			if (category == null) {
 	    				LOG.debug("adding category {}", category);
 	    				category = new Category(name);

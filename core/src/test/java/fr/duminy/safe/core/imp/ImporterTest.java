@@ -77,7 +77,7 @@ public class ImporterTest extends AbstractImporterTest {
 		assertThat(model.getRootCategory()).isEqualsToByComparingFields(root);
 		
 		Category expected = category("messagerie");
-		Category actual = Finders.findCategory(model.getRootCategory(), expected.getName()).getFoundCategory(); 
+		Category actual = Finders.findCategory(model.getRootCategory(), expected.getName()).getFoundCategories().get(0); 
 		assertThat(actual).isEqualsToByComparingFields(expected);		
 		assertThat(actual.getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(root, expected);
 	}
