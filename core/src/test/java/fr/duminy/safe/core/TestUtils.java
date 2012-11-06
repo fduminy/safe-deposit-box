@@ -38,6 +38,24 @@ public class TestUtils {
     private TestUtils() {        
     }
         
+    public static <T> int compare(List<T> path1,
+			List<T> path2, Comparator<T> comparator) {
+    	int result = 0;
+		if (path1.size() != path2.size()) {
+			result = path1.size() - path2.size();
+		} else {
+			for (int i = 0; i < path1.size(); i++) {
+				T category1 = path1.get(i);
+				T category2 = path2.get(i);
+				result = comparator.compare(category1, category2);
+				if (result != 0) {
+					break;
+				}
+			}
+		}
+		return result;
+	}			
+    
     private static final class PasswordComparator implements Comparator<Password> {
 		@Override
 		public int compare(Password o1, Password o2) {
@@ -57,21 +75,10 @@ public class TestUtils {
 			if (result == 0) {
 				List<Category> path1 = o1.getPath();
 				List<Category> path2 = o2.getPath();
-				if (path1.size() != path2.size()) {
-					result = path1.size() - path2.size();
-				} else {
-					for (int i = 0; i < path1.size(); i++) {
-						Category category1 = path1.get(i);
-						Category category2 = path2.get(i);
-						result = CATEGORY_COMPARATOR.compare(category1, category2);
-						if (result != 0) {
-							break;
-						}
-					}
-				}
+				result = TestUtils.compare(path1, path2, CATEGORY_COMPARATOR);
 			}
 			return result;
-		}			
+		}
 	};
     public static final PasswordWithPathComparator PASSWORD_WITH_PATH_COMPARATOR = new PasswordWithPathComparator();
     

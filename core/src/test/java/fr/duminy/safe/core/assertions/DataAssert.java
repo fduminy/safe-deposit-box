@@ -18,44 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.finder;
+package fr.duminy.safe.core.assertions;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.fest.assertions.api.Assertions.assertThat;
 
-import fr.duminy.safe.core.finder.CategoryFinder.CategoryFinderResult;
-import fr.duminy.safe.core.model.Category;
-import fr.duminy.safe.core.model.Password;
+import java.util.Comparator;
 
-public class CategoryFinder implements Finder<CategoryFinderResult> {
-	private final String name;
-	private final List<Category> categories = new ArrayList<Category>();
-	
-	CategoryFinder(String name) {
-		this.name = name;
-	}
-	
-	@Override
-	public boolean visit(Category category) {
-		if ((name == null) || name.equals(category.getName())) {
-			categories.add(category);
-		}
-		return true;
+import org.fest.assertions.api.AbstractAssert;
+
+import fr.duminy.safe.core.Data;
+
+public class DataAssert<T> extends AbstractAssert<DataAssert<T>, Data<T>> {
+	protected DataAssert(Data<T> actual) {
+		super(actual, DataAssert.class);
 	}
 
 	@Override
-	public boolean visit(Password p) {
-		return true;
+	public DataAssert<T> usingComparator(
+			Comparator<? super Data<T>> customComparator) {
+		throw new UnsupportedOperationException(
+				"custom Comparator is not supported for Data comparison");
 	}
 
-	@Override
-	public CategoryFinderResult getResult() {
-		return new CategoryFinderResult();
-	}
-	
-	public class CategoryFinderResult implements FinderResult {
-		public List<Category> getFoundCategories() {
-			return categories;
-		}
+	public void isNotEmpty() {
+		assertThat(actual.getBytes()).isNotNull().isNotEmpty();
 	}
 }

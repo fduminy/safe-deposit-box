@@ -20,42 +20,47 @@
  */
 package fr.duminy.safe.core.serialization;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static fr.duminy.safe.core.TestDataUtils.buildModel;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 import org.picocontainer.DefaultPicoContainer;
 
+import fr.duminy.safe.core.Data;
 import fr.duminy.safe.core.model.Model;
 
+@RunWith(Theories.class)
 public class SerializerTest {
-	private DefaultPicoContainer container = new DefaultPicoContainer();
-	private Model model;
-    private Serializer<Model> serializer;
-    
-    @Before
-    public void setUp() {
-    	serializer = new DefaultSerializer<Model>();
-    	container.addComponent(serializer);
-    	model = new Model();
-    }
-
-    @After
-    public void tearDown() {
-    	serializer = null;
-    }
-
-	@Test
-	public void testSerialize() throws SerializerException {
-		serializer.serialize(container, model);
+	@DataPoint public static TestData EMPTY_MODEL = new TestData(new Model(), new DefaultSerializer<Model>());
+	@DataPoint public static TestData COMPLETE_MODEL = new TestData(buildModel(), new DefaultSerializer<Model>());
+		
+	@Theory
+	public void testSerialize(TestData data) throws SerializerException {
+		Data<Model> result = data.serializer.serialize(data.container, data.model);
+				
+		assertThat(result).isNotNull().isNotEmpty();
 	}
 	
-	@Test
-	public void testSerializeAndDeserialize() throws SerializerException {
-		Model result = serializer.serialize(container, model).deserialize();
-        assertNotNull(result);
-        assertNotSame(model, result);
+	@Theory
+	public void testSerializeAndDeserialize(TestData data) throws SerializerException {
+		Model result = data.serializer.serialize(data.container, data.model).deserialize();
+		
+		assertThat(result).isNotNull().isNotSameAs(data.model).isEqualTo(data.model);
+	}
+	
+	private static class TestData {
+		private final DefaultPicoContainer container = new DefaultPicoContainer();
+		private final Model model;
+		private final Serializer<Model> serializer;
+		public TestData(Model model, Serializer<Model> serializer) {
+			super();
+			this.model = model;
+			this.serializer = serializer;
+			container.addComponent(serializer);
+		}
 	}
 }
