@@ -92,8 +92,12 @@ public class CategoriesPanel extends SPanel {
 	}
 	
 	public Category getSelectedCategory() {
+		Category category = null;		
 		TreePath path = categoriesTree.getSelectionPath();
-		CategoryNode node = (CategoryNode) path.getLastPathComponent();
-		return node.getCategory();
+		if (path != null) {
+			CategoryNode node = (CategoryNode) path.getLastPathComponent();
+			category = node.getCategory();
+		}
+		return category;
 	}
 }
