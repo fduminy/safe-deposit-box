@@ -78,9 +78,13 @@ public class NamedList<T extends Named> extends AbstractList<T> implements Seria
 	public int size() {
 		return list.size();
 	}
+	
+	public boolean contains(String name) {
+		return names.contains(name);
+	}
 
 	private void checkDuplicateName(T element, int excludeIndex) {
-		if (names.contains(element.getName())) {
+		if (contains(element.getName())) {
 			if (excludeIndex >= 0) {
 				T e = list.get(excludeIndex);
 				if ((e != null) && !e.getName().equals(element.getName())) {

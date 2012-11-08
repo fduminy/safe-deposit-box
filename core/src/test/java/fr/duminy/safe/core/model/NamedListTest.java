@@ -87,6 +87,19 @@ public class NamedListTest {
     }
 	
 	@Test
+	public void testContains() {
+		String name1 = "ABC";
+		String name2 = "DEF";
+		NamedList<TestClass> list = createList(null, name1, name2);
+		
+		assertThat(list.contains(name1)).as("list must contains '" + name1 + "'").isTrue();
+		assertThat(list.contains(name2)).as("list must contains '" + name2 + "'").isTrue();
+		String wrongName = "wrongName";
+		assertThat(list.contains(wrongName)).as("list must not contains '" + wrongName + "'").isFalse();
+		assertThat(list.contains(null)).as("list must not contains null").isFalse();
+	}
+	
+	@Test
 	public void testSet() {
 		NamedList<TestClass> list = createList(null, "ABC", "DEF");
 		list.set(1, new TestClass("UVW"));
