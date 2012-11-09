@@ -26,6 +26,7 @@ import static fr.duminy.safe.core.finder.Finders.getPasswords;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
 import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
 import static fr.duminy.safe.core.TestDataUtils.Node;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
@@ -52,7 +53,7 @@ public class PasswordFinderTest  {
 	@DataPoint public static final Data ROOT_PASSWORD_NON_RECURSIVE = data(ROOT, true, false);
 	@DataPoint public static final Data CHILD_PASSWORD_NON_RECURSIVE = data(CHILD, false, false);
 
-	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, join(ROOT.getPasswordNames(), CHILD.getPasswordNames()));
+	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, join(ROOT.getPasswordNames(), CHILD.getPasswordNames(), GRANDCHILD.getPasswordNames()));
 	@DataPoint public static final DataAllCategories ROOT_PASSWORD_NON_RECURSIVE_ALL_CATEGORIES = dataAllCategories(ROOT, true, false, ROOT.getPasswordNames());
 	
 	@DataPoint public static final Data ROOT_PASSWORD_WRONG_CATEGORY = data(node(WRONG_NAME, ROOT.getPasswordNames()[0]), false, true);

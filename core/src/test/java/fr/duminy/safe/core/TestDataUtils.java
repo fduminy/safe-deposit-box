@@ -33,9 +33,14 @@ import fr.duminy.safe.core.model.Password;
 public class TestDataUtils {
 	public static String WRONG_NAME = "wrong name";
 	
-	private static String ROOT_NAME = "root";	
+	private static String ROOT_NAME = "root";		
 	public static Node ROOT = node(ROOT_NAME, 2);
-	public static Node CHILD = node("child", 2);
+	
+	private static String CHILD_NAME = "child";
+	public static Node CHILD = node(CHILD_NAME, 2);
+	
+	private static String GRANDCHILD_NAME = "grandchild";
+	public static Node GRANDCHILD = node(GRANDCHILD_NAME, 2);
 
 	public static Model buildModel() {
 		return buildModel(null, null);
@@ -49,30 +54,33 @@ public class TestDataUtils {
 	}
 
 	private static Model buildModel(List<Category> categories, Map<String, Category> categoriesMap) {
-		Model model = new Model();		
-		Category child = buildCategory(model, CHILD);
-		Category root = buildCategory(model, ROOT);
+		Model model = new Model();
+		Category root = buildCategory(model, ROOT, null);
+		Category child = buildCategory(model, CHILD, root);
+		Category grandchild = buildCategory(model, GRANDCHILD, child);
 		
 		if (categories != null) {
 			categories.add(root);
 			categories.add(child);
+			categories.add(grandchild);
 		}
 		
 		if (categoriesMap != null) {
 			categoriesMap.put(root.getName(), root);
 			categoriesMap.put(child.getName(), child);
+			categoriesMap.put(grandchild.getName(), grandchild);
 		}
 
 		return model;
 	}
 	
-	private static Category buildCategory(Model model, Node node) {
+	private static Category buildCategory(Model model, Node node, Category parent) {
 		Category category;
-		if (node.getCategoryName() == ROOT_NAME) {
+		if (parent == null) {
 			category = model.getRootCategory();
 		} else {
 			category = category(node.getCategoryName());
-			model.getRootCategory().add(category);
+			parent.add(category);
 		}
 		
 		for (String name : node.getPasswordNames()) {

@@ -21,7 +21,10 @@
 package fr.duminy.safe.core.assertions;
 
 import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
+import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +36,7 @@ import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Model;
+import fr.duminy.safe.core.model.Password;
 
 public class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	protected ModelAssert(Model actual) {
@@ -46,6 +50,24 @@ public class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		throw new UnsupportedOperationException(
 				"custom Comparator is not supported for Model comparison");
 	}
+	
+	public ModelAssert isEmpty() {
+    	// checks model's global password list
+    	assertThat(actual.getPasswords()).isNotNull().isEmpty();
+    	
+    	// checks model's categories
+    	assertThat(actual.getRootCategory()).isEmpty();
+    	return this;
+	}
+	
+	public ModelAssert containsExactly(Password... passwords) {
+    	// checks model's global password list
+    	assertThat(actual.getPasswords()).isNotNull().hasSize(passwords.length).usingElementComparator(PASSWORD_COMPARATOR).containsExactly(passwords);    	
+    	
+    	// checks model's categories
+    	assertThat(actual.getRootCategory()).containsExactly(passwords);
+    	return this;
+    }
 	
 	private static class ModelComparator implements Comparator<Model> {
 		private static final ModelComparator INSTANCE = new ModelComparator(); 

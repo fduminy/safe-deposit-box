@@ -21,9 +21,9 @@
 package fr.duminy.safe.core.model;
 
 import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
-import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.assertThatIsUnmodifiable;
 import static fr.duminy.safe.core.TestUtils.password;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.junit.Test;
@@ -61,7 +61,7 @@ public class ModelTest {
     	
     	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), category.getName(), password.getName(), true);
     	
-    	assertThatModelContainsExactly(model, password);
+    	assertThat(model).containsExactly(password);
     	if (rootCategory) {
     		assertThat(result.getPasswordsWithPath().get(0).getPath()).isNotNull().containsExactly(model.getRootCategory());
     	} else {
@@ -86,29 +86,29 @@ public class ModelTest {
     
     private void testRemovePassword(boolean sameName, boolean samePasswordInstance) {
     	Model model = new Model();    	
-    	assertThatModelIsEmpty(model);
+    	assertThat(model).isEmpty();
     	
     	Password p = password("name", "password");
     	model.addPassword(p);
-    	assertThatModelContainsExactly(model, p);
+    	assertThat(model).containsExactly(p);
     	
     	Password pwdToRemove = samePasswordInstance ? p : password(sameName ? "name" : "wrongName", "password");
     	model.removePassword(pwdToRemove);
     	if (sameName || samePasswordInstance) {
-    		assertThatModelIsEmpty(model);
+    		assertThat(model).isEmpty();
     	} else {
-    		assertThatModelContainsExactly(model, p);
+    		assertThat(model).containsExactly(p);
     	}
     }
     
     @Test
     public void testGetPasswords() {
     	Model model = new Model();    	
-    	assertThatModelIsEmpty(model);
+    	assertThat(model).isEmpty();
     	
     	Password p = password("name", "password");
     	model.addPassword(p);
-    	assertThatModelContainsExactly(model, p);
+    	assertThat(model).containsExactly(p);
     	assertThatIsUnmodifiable(model.getPasswords());
     }
 
@@ -136,28 +136,10 @@ public class ModelTest {
     	model.add(model2);
     	
     	// assertions
-    	assertThatModelContainsExactly(model, p, p2);
+    	assertThat(model).containsExactly(p, p2);
     	
     	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), p2.getName(), true);    	
     	assertThat(Finders.getPasswords(result.getPasswordsWithPath())).containsExactly(p2);
     	assertThat(result.getPasswordsWithPath().get(0).getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(model.getRootCategory());
 	}
-    
-    private void assertThatModelIsEmpty(Model model) {
-    	// checks model's global password list
-    	assertThat(model.getPasswords()).isNotNull().isEmpty();
-    	
-    	// checks model's categories
-    	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), null, true);
-    	assertThat(result.getPasswordsWithPath()).isNotNull().isEmpty();
-    }
-    
-    private void assertThatModelContainsExactly(Model model, Password... passwords) {
-    	// checks model's global password list
-    	assertThat(model.getPasswords()).isNotNull().hasSize(passwords.length).usingElementComparator(PASSWORD_COMPARATOR).containsExactly(passwords);    	
-    	
-    	// checks model's categories
-    	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), null, null, true);
-    	assertThat(Finders.getPasswords(result.getPasswordsWithPath())).isNotNull().hasSize(passwords.length).usingElementComparator(PASSWORD_COMPARATOR).containsExactly(passwords);
-    }
 }

@@ -25,6 +25,7 @@ import static fr.duminy.safe.core.TestUtils.category;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
 import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class CategoryFinderTest {
 		Category root = buildCategoryTree();		
 		List<Category> result = Finders.findCategory(root, null).getFoundCategories();
 		
-		assertThat(result).isNotNull().containsExactly(root, child());
+		assertThat(result).isNotNull().containsExactly(root, child(), grandchild());
 	}
 	
 	@Test
@@ -62,7 +63,11 @@ public class CategoryFinderTest {
 	private Category child() {
 		return category(CHILD.getCategoryName());
 	}
-	
+
+	private Category grandchild() {
+		return category(GRANDCHILD.getCategoryName());
+	}
+
 	@Test
 	public void testFindWrongName() {
 		Category root = buildCategoryTree();		
@@ -83,6 +88,8 @@ public class CategoryFinderTest {
 		List<Category> categories = new ArrayList<Category>();
 		buildCategoryTree(categories, null);
 		
-		assertThat(categories.get(1).getPath()).isNotNull().containsExactly(array(categories));
+		assertThat(categories.get(0).getPath()).isNotNull().containsExactly(array(categories.subList(0, 1)));
+		assertThat(categories.get(1).getPath()).isNotNull().containsExactly(array(categories.subList(0, 2)));
+		assertThat(categories.get(2).getPath()).isNotNull().containsExactly(array(categories));
 	}
 }

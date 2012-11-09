@@ -21,6 +21,7 @@
 package fr.duminy.safe.core.assertions;
 
 import fr.duminy.safe.core.Data;
+import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Model;
 
 public class Assertions extends org.fest.assertions.api.Assertions {
@@ -30,5 +31,9 @@ public class Assertions extends org.fest.assertions.api.Assertions {
 	
 	public static ModelAssert assertThat(Model actual) {
 		return new ModelAssert(actual);
+	}
+	
+	public static CategoryAssert assertThat(Category actual) {
+		return new CategoryAssert(actual);
 	}
 }
