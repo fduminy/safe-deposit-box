@@ -33,13 +33,16 @@ import fr.duminy.safe.core.model.Password;
 public class TestDataUtils {
 	public static String WRONG_NAME = "wrong name";
 	
-	private static String ROOT_NAME = "root";		
+	public static int ROOT_INDEX = 0;
+	public static String ROOT_NAME = "root";		
 	public static Node ROOT = node(ROOT_NAME, 2);
 	
-	private static String CHILD_NAME = "child";
+	public static int CHILD_INDEX = 1;
+	public static String CHILD_NAME = "child";
 	public static Node CHILD = node(CHILD_NAME, 2);
 	
-	private static String GRANDCHILD_NAME = "grandchild";
+	public static int GRANDCHILD_INDEX = 2;
+	public static String GRANDCHILD_NAME = "grandchild";
 	public static Node GRANDCHILD = node(GRANDCHILD_NAME, 2);
 
 	public static Model buildModel() {

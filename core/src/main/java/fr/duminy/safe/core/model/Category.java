@@ -31,16 +31,23 @@ public class Category extends Named implements Serializable {
      */
     private static final long serialVersionUID = 360495040202283307L;
     
-    private NamedList<Category> children = new NamedList<Category>("child");
-    private NamedList<Password> passwords = new NamedList<Password>("password");
+    private NamedList<Category> children;
+    private NamedList<Password> passwords;
     private Category parent;
     
     public Category() {
         this(null);
     }
-    
+
     public Category(String name) {
+    	this(null, name, null, null);
+    }
+    
+    private Category(Category parent, String name, NamedList<Category> children, NamedList<Password> passwords) {
         super(name);
+        this.parent = parent;
+        this.children = (children == null) ? new NamedList<Category>("child") : children;
+        this.passwords = (passwords == null) ? new NamedList<Password>("password") : passwords;
     }
 
     /**
@@ -62,6 +69,21 @@ public class Category extends Named implements Serializable {
 	void remove(Password password) {
 		passwords.remove(password);
 	}
+
+	public Category rename(String name) {
+		Category category = new Category(this.parent, name, this.children, this.passwords);
+		
+		if (parent != null) {
+			parent.children.remove(this);
+			parent.children.add(category);
+		}
+		
+		this.parent = null;
+		this.children = null;
+		this.passwords = null;
+		
+		return category;
+	}
     
     public boolean accept(CategoryVisitor visitor) {
     	return acceptImpl(visitor, true);
@@ -79,18 +101,22 @@ public class Category extends Named implements Serializable {
         	return false;
         }
         
-        for (Password p : passwords) {
-            if (!topCategory && !go) {
-            	return false;
-            }
-            go = visitor.visit(p);
+        if (passwords != null) {
+	        for (Password p : passwords) {
+	            if (!topCategory && !go) {
+	            	return false;
+	            }
+	            go = visitor.visit(p);
+	        }
         }
         
-        for (Category c : children) {
-            if (!topCategory && !go) {
-            	return false;
-            }
-        	go = c.acceptImpl(visitor, false);
+        if (children != null) {
+	        for (Category c : children) {
+	            if (!topCategory && !go) {
+	            	return false;
+	            }
+	        	go = c.acceptImpl(visitor, false);
+	        }
         }
         
         return true;
@@ -140,5 +166,5 @@ public class Category extends Named implements Serializable {
         public String toString() {
             return buffer.toString();
         }
-    }    
+    }
 }
