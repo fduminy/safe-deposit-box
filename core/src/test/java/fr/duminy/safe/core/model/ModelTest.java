@@ -20,7 +20,6 @@
  */
 package fr.duminy.safe.core.model;
 
-import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.assertThatIsUnmodifiable;
 import static fr.duminy.safe.core.TestUtils.password;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
@@ -31,6 +30,7 @@ import org.junit.Test;
 import fr.duminy.safe.core.CoreException;
 import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 public class ModelTest {
 	@Test
@@ -62,10 +62,11 @@ public class ModelTest {
     	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), category.getName(), password.getName(), true);
     	
     	assertThat(model).containsExactly(password);
+    	PasswordWithPath firstCategory = result.getPasswordsWithPath().get(0); 
     	if (rootCategory) {
-    		assertThat(result.getPasswordsWithPath().get(0).getPath()).isNotNull().containsExactly(model.getRootCategory());
+    		assertThat(firstCategory).hasPath(model.getRootCategory());
     	} else {
-    		assertThat(result.getPasswordsWithPath().get(0).getPath()).isNotNull().containsExactly(model.getRootCategory(), category);
+    		assertThat(firstCategory).hasPath(model.getRootCategory(), category);
     	}
     }
     
@@ -118,7 +119,7 @@ public class ModelTest {
     	
     	assertThat(model.getRootCategory()).isNotNull();
     	assertThat(model.getRootCategory().getName()).isEqualTo("root");
-    	assertThat(model.getRootCategory().getPath()).containsExactly(model.getRootCategory());
+    	assertThat(model.getRootCategory()).hasPath(model.getRootCategory());
     }
 
     @Test
@@ -140,6 +141,6 @@ public class ModelTest {
     	
     	PasswordFinderResult result = Finders.findPassword(model.getRootCategory(), p2.getName(), true);    	
     	assertThat(Finders.getPasswords(result.getPasswordsWithPath())).containsExactly(p2);
-    	assertThat(result.getPasswordsWithPath().get(0).getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(model.getRootCategory());
+    	assertThat(result.getPasswordsWithPath().get(0)).hasPath(model.getRootCategory());
 	}
 }

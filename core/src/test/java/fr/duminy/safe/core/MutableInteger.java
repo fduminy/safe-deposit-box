@@ -18,27 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-package fr.duminy.safe.core.assertions;
+package fr.duminy.safe.core;
 
-import fr.duminy.safe.core.Data;
-import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
-import fr.duminy.safe.core.model.Category;
-import fr.duminy.safe.core.model.Model;
-
-public class Assertions extends org.fest.assertions.api.Assertions {
-	public static <T> DataAssert<T> assertThat(Data<T> actual) {
-		return new DataAssert<T>(actual);
+public class MutableInteger {
+	private int value;
+	
+	public int getValue() {
+		return value;
 	}
 	
-	public static ModelAssert assertThat(Model actual) {
-		return new ModelAssert(actual);
-	}
-	
-	public static CategoryAssert assertThat(Category actual) {
-		return new CategoryAssert(actual);
-	}
-	
-	public static PasswordWithPathAssert assertThat(PasswordWithPath actual) {
-		return new PasswordWithPathAssert(actual);
+	public void increment() {
+		value++;
 	}
 }

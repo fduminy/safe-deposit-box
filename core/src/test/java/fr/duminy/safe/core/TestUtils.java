@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.junit.Assert;
 
+import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
@@ -90,18 +91,30 @@ public class TestUtils {
 	};
 	public static final CategoryComparator CATEGORY_COMPARATOR = new CategoryComparator();
 	    
-	public static String[] join(String[]... arrays) {
+	public static Collection<PasswordWithPath> allPasswordsWithPath(Category category) {
+		return Finders.findPassword(category, null, null, true).getPasswordsWithPath();		
+	}
+
+	public static Collection<Password> allPasswords(Category category) {
+		return Finders.findPassword(category, null, null, true).getPasswords();		
+	}
+	
+	public static <T> T[] join(Class<T> clazz, T[]... arrays) {
 		int size = 0;
-		for (String[] array : arrays) {
+		for (T[] array : arrays) {
 			size += array.length;
 		}
-		String[] result = new String[size];
+		T[] result = newArray(clazz, size);
 		int i = 0;
-		for (String[] array : arrays) {
+		for (T[] array : arrays) {
 			System.arraycopy(array, 0, result, i, array.length);
 			i += array.length;
 		}
 		return result;
+	}
+	
+	public static Category[] join(Collection<Category> list, Category... items) {
+		return join(Category.class, list.toArray(newArray(list, Category.class)), items);
 	}
 	
 	public static void assertArrayNotEquals(String message, byte[] expected,
@@ -132,10 +145,21 @@ public class TestUtils {
 		return new Category(name);
 	}
     
+	public static Category[] array(Collection<Category> values) {    	
+    	return array(values, Category.class);
+    }
+
+	public static <T> T[] array(Collection<T> values, Class<T> clazz) {    	
+    	return values.toArray(newArray(values, clazz));
+    }
+	
+	private static <T> T[] newArray(Collection<T> values, Class<T> clazz) {    	
+    	return newArray(clazz, values.size());
+    }
+
     @SuppressWarnings("unchecked")
-	public static <T> T[] array(Collection<T> values) {    	
-    	T[] a = (T[]) Array.newInstance(values.isEmpty() ? Object.class : values.iterator().next().getClass(), values.size());
-    	return values.toArray(a);    	
+    private static <T> T[] newArray(Class<T> clazz, int size) {    	
+    	return (T[]) Array.newInstance(clazz, size);
     }
     
     /**
@@ -152,4 +176,14 @@ public class TestUtils {
 	    	}
     	}
     }
+
+	public static <T> T[] transform(T[] items, Transformer<T> transformer, MutableInteger transformationCounter) {
+		if (transformer != null) {
+			for (int i = 0; i < items.length; i++) {
+				items[i] = transformer.transform(items[i], transformationCounter);
+			}
+		}
+		
+		return items;
+	}
 }

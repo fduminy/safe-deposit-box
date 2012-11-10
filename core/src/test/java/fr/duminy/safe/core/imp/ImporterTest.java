@@ -20,10 +20,10 @@
  */
 package fr.duminy.safe.core.imp;
 
+import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
-import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
-import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -74,12 +74,12 @@ public class ImporterTest extends AbstractImporterTest {
 		
 		Category root = category("root");
 		assertThat(model.getRootCategory()).isNotNull();
-		assertThat(model.getRootCategory()).isEqualsToByComparingFields(root);
+		assertThat(model.getRootCategory()).isEqualsTo(root);
 		
 		Category expected = category("messagerie");
 		Category actual = Finders.findCategory(model.getRootCategory(), expected.getName()).getFoundCategories().get(0); 
-		assertThat(actual).isEqualsToByComparingFields(expected);		
-		assertThat(actual.getPath()).usingElementComparator(CATEGORY_COMPARATOR).containsExactly(root, expected);
+		assertThat(actual).isEqualsTo(expected);		
+		assertThat(actual).hasPath(root, expected);
 	}
 	
 	private void testImport_SingleLine(Importer importer, String[] columns) throws Exception {

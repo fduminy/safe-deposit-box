@@ -22,10 +22,13 @@ package fr.duminy.safe.core.model;
 
 import static fr.duminy.safe.core.TestUtils.array;
 import static fr.duminy.safe.core.TestUtils.category;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
 import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
+import static fr.duminy.safe.core.TestDataUtils.ROOT_INDEX;
+import static fr.duminy.safe.core.TestDataUtils.CHILD_INDEX;
+import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD_INDEX;
 import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import java.util.ArrayList;
@@ -80,7 +83,7 @@ public class CategoryFinderTest {
 	public void testGetPathRoot() {
 		Category root = buildCategoryTree();
 		
-		assertThat(root.getPath()).isNotNull().containsExactly(root);
+		assertThat(root).hasPath(root);
 	}
 
 	@Test
@@ -88,8 +91,8 @@ public class CategoryFinderTest {
 		List<Category> categories = new ArrayList<Category>();
 		buildCategoryTree(categories, null);
 		
-		assertThat(categories.get(0).getPath()).isNotNull().containsExactly(array(categories.subList(0, 1)));
-		assertThat(categories.get(1).getPath()).isNotNull().containsExactly(array(categories.subList(0, 2)));
-		assertThat(categories.get(2).getPath()).isNotNull().containsExactly(array(categories));
+		assertThat(categories.get(ROOT_INDEX)).hasPath(array(categories.subList(0, CHILD_INDEX)));
+		assertThat(categories.get(CHILD_INDEX)).hasPath(array(categories.subList(0, GRANDCHILD_INDEX)));
+		assertThat(categories.get(GRANDCHILD_INDEX)).hasPath(array(categories));
 	}
 }

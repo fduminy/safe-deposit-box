@@ -20,25 +20,34 @@
  */
 package fr.duminy.safe.core.assertions;
 
-import fr.duminy.safe.core.Data;
+import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
+import static fr.duminy.safe.core.TestUtils.array;
+
+import java.util.Comparator;
+
+import org.fest.assertions.api.AbstractAssert;
+
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
-import fr.duminy.safe.core.model.Model;
 
-public class Assertions extends org.fest.assertions.api.Assertions {
-	public static <T> DataAssert<T> assertThat(Data<T> actual) {
-		return new DataAssert<T>(actual);
+public class PasswordWithPathAssert extends AbstractAssert<PasswordWithPathAssert, PasswordWithPath> {
+	protected PasswordWithPathAssert(PasswordWithPath actual) {
+		super(actual, PasswordWithPathAssert.class);
+		super.usingComparator(PASSWORD_WITH_PATH_COMPARATOR);
 	}
-	
-	public static ModelAssert assertThat(Model actual) {
-		return new ModelAssert(actual);
+
+	@Override
+	public PasswordWithPathAssert usingComparator(
+			Comparator<? super PasswordWithPath> customComparator) {
+		throw new UnsupportedOperationException(
+				"custom Comparator is not supported for PasswordWithPath comparison");
 	}
-	
-	public static CategoryAssert assertThat(Category actual) {
-		return new CategoryAssert(actual);
+
+	public void hasPath(Category... expectedPath) {
+		CategoryAssert.assertSamePath(actual.getPath(), expectedPath);
 	}
-	
-	public static PasswordWithPathAssert assertThat(PasswordWithPath actual) {
-		return new PasswordWithPathAssert(actual);
+
+	public void hasSamePathAs(Category expectedCategory) {
+		hasPath(array(expectedCategory.getPath()));
 	}
 }

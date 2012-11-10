@@ -21,9 +21,10 @@
 package fr.duminy.safe.core.model;
 
 import static fr.duminy.safe.core.TestUtils.join;
+import static fr.duminy.safe.core.TestUtils.array;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
 import static fr.duminy.safe.core.finder.Finders.getPasswords;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
 import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
@@ -53,7 +54,7 @@ public class PasswordFinderTest  {
 	@DataPoint public static final Data ROOT_PASSWORD_NON_RECURSIVE = data(ROOT, true, false);
 	@DataPoint public static final Data CHILD_PASSWORD_NON_RECURSIVE = data(CHILD, false, false);
 
-	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, join(ROOT.getPasswordNames(), CHILD.getPasswordNames(), GRANDCHILD.getPasswordNames()));
+	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, join(String.class, ROOT.getPasswordNames(), CHILD.getPasswordNames(), GRANDCHILD.getPasswordNames()));
 	@DataPoint public static final DataAllCategories ROOT_PASSWORD_NON_RECURSIVE_ALL_CATEGORIES = dataAllCategories(ROOT, true, false, ROOT.getPasswordNames());
 	
 	@DataPoint public static final Data ROOT_PASSWORD_WRONG_CATEGORY = data(node(WRONG_NAME, ROOT.getPasswordNames()[0]), false, true);
@@ -84,7 +85,7 @@ public class PasswordFinderTest  {
 			
 			// checks password path
 			Category expectedCategory = categoriesMap.get(data.getCategoryName());
-			assertThat(result.getPasswordsWithPath().get(0).getPath()).isEqualTo(expectedCategory.getPath());
+			assertThat(result.getPasswordsWithPath().get(0)).hasSamePathAs(expectedCategory);
 		}
 	}
 
@@ -125,7 +126,7 @@ public class PasswordFinderTest  {
 			PasswordFinderResult result2 = Finders.findPassword(start, passwordName, data.isRecursive());
 			assertThat(result2.getPasswords()).isEqualTo(result.getPasswords());
 			
-			PasswordWithPath[] passwords2 = result.getPasswordsWithPath().toArray(new PasswordWithPath[result.getPasswordsWithPath().size()]);
+			PasswordWithPath[] passwords2 = array(result.getPasswordsWithPath(), PasswordWithPath.class);
 			assertThat(result2.getPasswordsWithPath()).usingElementComparator(PASSWORD_WITH_PATH_COMPARATOR).containsExactly(passwords2);
 		}
 		

@@ -56,7 +56,7 @@ public class ModelAssert extends AbstractAssert<ModelAssert, Model> {
     	assertThat(actual.getPasswords()).isNotNull().isEmpty();
     	
     	// checks model's categories
-    	assertThat(actual.getRootCategory()).isEmpty();
+    	assertThat(actual.getRootCategory()).hasNoPassword();
     	return this;
 	}
 	
