@@ -72,6 +72,10 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 	}
 
 	static void assertSamePath(List<Category> actualPath, Category... expectedPath) {
+		String errorMessage = " path can't be empty";
+		assertThat(actualPath).as("actual" + errorMessage).isNotEmpty();
+		assertThat(expectedPath).as("expected" + errorMessage).isNotEmpty();
+		
 		assertThat(actualPath).as("wrong actual path").usingElementComparator(CATEGORY_COMPARATOR).containsExactly(expectedPath);
 	}
 	
