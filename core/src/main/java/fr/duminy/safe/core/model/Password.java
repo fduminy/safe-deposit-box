@@ -42,7 +42,6 @@ public class Password extends Named implements Serializable {
     
     @Override
     public String toString() {
-        return "Password [password=" + password + ", name=" + getName()
-                + "]";
+        return getName();
     }
 }

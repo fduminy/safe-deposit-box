@@ -158,7 +158,7 @@ public class Category extends Named implements Serializable {
         
         @Override
         public boolean visit(Password p) {
-            buffer.append(p);
+            buffer.append(' ').append(p);
             return true;
         }
         
