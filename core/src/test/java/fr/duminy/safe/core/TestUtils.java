@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.junit.Assert;
 
+import fr.duminy.safe.core.TestDataUtils.Node;
 import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
@@ -141,6 +142,10 @@ public class TestUtils {
 		return new Password(name, password);
 	}
 	
+    public static Category category(Node node) {
+    	return category(node.getCategoryName());
+    }
+    
     public static Category category(String name) {
 		return new Category(name);
 	}

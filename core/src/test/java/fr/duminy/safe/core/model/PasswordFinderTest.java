@@ -20,20 +20,20 @@
  */
 package fr.duminy.safe.core.model;
 
-import static fr.duminy.safe.core.TestUtils.join;
-import static fr.duminy.safe.core.TestUtils.array;
-import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
-import static fr.duminy.safe.core.finder.Finders.getPasswords;
-import static fr.duminy.safe.core.assertions.Assertions.assertThat;
-import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
-import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
+import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
-import static fr.duminy.safe.core.TestDataUtils.Node;
+import static fr.duminy.safe.core.TestDataUtils.allPasswordNames;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.node;
+import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
+import static fr.duminy.safe.core.TestUtils.array;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
+import static fr.duminy.safe.core.finder.Finders.getPasswords;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
+import fr.duminy.safe.core.TestDataUtils.Node;
 import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
@@ -54,7 +55,7 @@ public class PasswordFinderTest  {
 	@DataPoint public static final Data ROOT_PASSWORD_NON_RECURSIVE = data(ROOT, true, false);
 	@DataPoint public static final Data CHILD_PASSWORD_NON_RECURSIVE = data(CHILD, false, false);
 
-	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, join(String.class, ROOT.getPasswordNames(), CHILD.getPasswordNames(), GRANDCHILD.getPasswordNames()));
+	@DataPoint public static final DataAllCategories ROOT_PASSWORD_ALL_CATEGORIES = dataAllCategories(ROOT, true, true, allPasswordNames());
 	@DataPoint public static final DataAllCategories ROOT_PASSWORD_NON_RECURSIVE_ALL_CATEGORIES = dataAllCategories(ROOT, true, false, ROOT.getPasswordNames());
 	
 	@DataPoint public static final Data ROOT_PASSWORD_WRONG_CATEGORY = data(node(WRONG_NAME, ROOT.getPasswordNames()[0]), false, true);
@@ -72,8 +73,8 @@ public class PasswordFinderTest  {
 	
 	@Theory
 	public void testFindOne(Data data) {
-		Map<String, Category> categoriesMap = new HashMap<String, Category>(); 
-		Category root = buildCategoryTree(null, categoriesMap);		
+		Map<Node, Category> categoriesMap = new HashMap<Node, Category>(); 
+		Category root = buildCategoryTree(categoriesMap);		
 		String passwordName = data.node.getPasswordNames()[0];
 		
 		PasswordFinderResult result = findPassword(data, root, passwordName, data.mustBeFound ? 1 : 0);
@@ -84,7 +85,7 @@ public class PasswordFinderTest  {
 			assertThat(result.getPasswordsWithPath().get(0).getPassword().getName()).isEqualTo(passwordName);
 			
 			// checks password path
-			Category expectedCategory = categoriesMap.get(data.getCategoryName());
+			Category expectedCategory = categoriesMap.get(data.getNode());
 			assertThat(result.getPasswordsWithPath().get(0)).hasSamePathAs(expectedCategory);
 		}
 	}
@@ -101,7 +102,7 @@ public class PasswordFinderTest  {
 			for (Password p : result.getPasswords()) {
 				names.add(p.getName());
 			}
-			assertThat(names).containsExactly(data.getExpectedPasswordNames());
+			assertThat(names).containsAll(Arrays.asList(data.getExpectedPasswordNames()));
 		}
 	}
 	
@@ -154,6 +155,10 @@ public class PasswordFinderTest  {
 			return node.getPasswordNames();
 		}
 
+		public Node getNode() {
+			return node;
+		}
+		
 		public String getCategoryName() {
 			return node.getCategoryName();
 		}
@@ -175,6 +180,10 @@ public class PasswordFinderTest  {
 		}		
 		
 		@Override
+		public Node getNode() {
+			return null;
+		}
+
 		public String getCategoryName() {
 			return null;
 		}

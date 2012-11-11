@@ -20,31 +20,31 @@
  */
 package fr.duminy.safe.core.model;
 
-import static fr.duminy.safe.core.TestUtils.array;
-import static fr.duminy.safe.core.TestUtils.category;
-import static fr.duminy.safe.core.assertions.Assertions.assertThat;
-import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
-import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
-import static fr.duminy.safe.core.TestDataUtils.ROOT_INDEX;
-import static fr.duminy.safe.core.TestDataUtils.CHILD_INDEX;
-import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD_INDEX;
+import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.WRONG_NAME;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
-import java.util.ArrayList;
+import static fr.duminy.safe.core.TestUtils.category;
+import static fr.duminy.safe.core.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
+import fr.duminy.safe.core.TestDataUtils.Node;
 import fr.duminy.safe.core.finder.Finders;
 
 public class CategoryFinderTest {
 	@Test
 	public void testFindAll() {
-		Category root = buildCategoryTree();		
+		Map<Node, Category> categories = new HashMap<Node, Category>(); 
+		Category root = buildCategoryTree(categories);		
 		List<Category> result = Finders.findCategory(root, null).getFoundCategories();
 		
-		assertThat(result).isNotNull().containsExactly(root, child(), grandchild());
+		assertThat(result).isNotNull().containsAll(categories.values());
 	}
 	
 	@Test
@@ -60,15 +60,7 @@ public class CategoryFinderTest {
 		Category root = buildCategoryTree();	
 		List<Category> result = Finders.findCategory(root, CHILD.getCategoryName()).getFoundCategories();
 		
-		assertThat(result).isNotNull().containsExactly(child());
-	}
-
-	private Category child() {
-		return category(CHILD.getCategoryName());
-	}
-
-	private Category grandchild() {
-		return category(GRANDCHILD.getCategoryName());
+		assertThat(result).isNotNull().containsExactly(category(CHILD));
 	}
 
 	@Test
@@ -88,11 +80,13 @@ public class CategoryFinderTest {
 
 	@Test
 	public void testGetPathChild() {
-		List<Category> categories = new ArrayList<Category>();
-		buildCategoryTree(categories, null);
-		
-		assertThat(categories.get(ROOT_INDEX)).hasPath(array(categories.subList(0, CHILD_INDEX)));
-		assertThat(categories.get(CHILD_INDEX)).hasPath(array(categories.subList(0, GRANDCHILD_INDEX)));
-		assertThat(categories.get(GRANDCHILD_INDEX)).hasPath(array(categories));
+		Map<Node, Category> categories = new HashMap<Node, Category>();
+		buildCategoryTree(categories);
+
+		for (Node node : categories.keySet()) {
+			Category category = categories.get(node);
+			Category[] expectedPath = node.buildExpectedPath(categories); 
+			assertThat(category).as("Wrong path for category " + node.getCategoryName()).hasPath(expectedPath);
+		}
 	}
 }

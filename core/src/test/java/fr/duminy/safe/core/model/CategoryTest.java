@@ -20,21 +20,22 @@
  */
 package fr.duminy.safe.core.model;
 
-import static fr.duminy.safe.core.TestDataUtils.CHILD_INDEX;
-import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD_INDEX;
-import static fr.duminy.safe.core.TestDataUtils.ROOT_INDEX;
+import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
+import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestUtils.array;
-import static fr.duminy.safe.core.TestUtils.join;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
 import fr.duminy.safe.core.MutableInteger;
+import fr.duminy.safe.core.TestDataUtils.Node;
 import fr.duminy.safe.core.Transformer;
 import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
@@ -42,25 +43,25 @@ import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 public class CategoryTest {
 	@Test
 	public void testRename_Root() {
-		testRename(ROOT_INDEX);		
+		testRename(ROOT);		
 	}
 	
 	@Test
 	public void testRename_Child() {
-		testRename(CHILD_INDEX);		
+		testRename(CHILD);		
 	}
 	
 	@Test
 	public void testRename_GrandChild() {
-		testRename(GRANDCHILD_INDEX);		
+		testRename(GRANDCHILD);		
 	}
 	
-	private void testRename(int categoryIndex) {
-		List<Category> allCategories = new ArrayList<Category>(); 
-		buildCategoryTree(allCategories, null);
+	private void testRename(Node node) {
+		Map<Node, Category> allCategories = new HashMap<Node, Category>();
+		buildCategoryTree(allCategories);
 		
 		// memorize initial state
-		final Category category = allCategories.get(categoryIndex);
+		final Category category = allCategories.get(node);
 		PasswordWithPath[] passwords = array(Finders.findPassword(category, null, true).getPasswordsWithPath(), PasswordWithPath.class);
 		Category[] categories = array(Finders.findCategory(category, null).getFoundCategories());
 		String name = category.getName();
@@ -77,7 +78,9 @@ public class CategoryTest {
 		assertThat(category2).isNotNull().isNotSameAs(category);		
 		assertThat(category2.getName()).isEqualTo(name2);
 		
-		assertThat(category2).hasPath(join(allCategories.subList(0, categoryIndex), category2));
+		Category[] expectedPath = node.buildExpectedPath(allCategories);
+		expectedPath[expectedPath.length - 1] = category2;
+		assertThat(category2).hasPath(expectedPath);
 			
 		assertThat(category2).usingPasswordTransformer(replaceEndOfPathBy(category2)).hasPasswords(passwords);
 		

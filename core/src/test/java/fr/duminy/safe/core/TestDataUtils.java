@@ -23,6 +23,7 @@ package fr.duminy.safe.core;
 import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,51 +34,47 @@ import fr.duminy.safe.core.model.Password;
 public class TestDataUtils {
 	public static String WRONG_NAME = "wrong name";
 	
-	public static int ROOT_INDEX = 0;
-	public static String ROOT_NAME = "root";		
-	public static Node ROOT = node(ROOT_NAME, 2);
-	
-	public static int CHILD_INDEX = 1;
-	public static String CHILD_NAME = "child";
-	public static Node CHILD = node(CHILD_NAME, 2);
-	
-	public static int GRANDCHILD_INDEX = 2;
-	public static String GRANDCHILD_NAME = "grandchild";
-	public static Node GRANDCHILD = node(GRANDCHILD_NAME, 2);
+	public static Node ROOT = node(null, "root", 2);
+	public static Node CHILD = node(ROOT, "child", 2);
+	public static Node CHILD2 = node(ROOT, "child2", 2);
+	public static Node GRANDCHILD = node(CHILD, "grandchild", 2);
+	public static Node GRANDCHILD2 = node(CHILD, "grandchild2", 2);
+	private static Node[] ALL_NODES = {ROOT, CHILD, CHILD2, GRANDCHILD, GRANDCHILD2};
 
+	public static String[] allPasswordNames() {
+		List<String> names = new ArrayList<String>();
+		for (Node node : ALL_NODES) {
+			for (String name : node.getPasswordNames()) {
+				names.add(name);
+			}
+		}
+		return names.toArray(new String[names.size()]);
+	}
+	
 	public static Model buildModel() {
-		return buildModel(null, null);
+		return buildModel(null);
 	}
 	
 	public static Category buildCategoryTree() {
-		return buildCategoryTree(null, null);
+		return buildCategoryTree(null);
 	}
-	public static Category buildCategoryTree(List<Category> categories, Map<String, Category> categoriesMap) {
-		return buildModel(categories, categoriesMap).getRootCategory();
+	public static Category buildCategoryTree(Map<Node, Category> categories) {
+		return buildModel(categories).getRootCategory();
 	}
 
-	private static Model buildModel(List<Category> categories, Map<String, Category> categoriesMap) {
+	private static Model buildModel(Map<Node, Category> categories) {
 		Model model = new Model();
-		Category root = buildCategory(model, ROOT, null);
-		Category child = buildCategory(model, CHILD, root);
-		Category grandchild = buildCategory(model, GRANDCHILD, child);
 		
-		if (categories != null) {
-			categories.add(root);
-			categories.add(child);
-			categories.add(grandchild);
-		}
+		Category root = buildCategory(null, ROOT, model, categories);
+		Category child = buildCategory(root, CHILD, model, categories);
+		buildCategory(root, CHILD2, model, categories);
+		buildCategory(child, GRANDCHILD, model, categories);
+		buildCategory(child, GRANDCHILD2, model, categories);
 		
-		if (categoriesMap != null) {
-			categoriesMap.put(root.getName(), root);
-			categoriesMap.put(child.getName(), child);
-			categoriesMap.put(grandchild.getName(), grandchild);
-		}
-
 		return model;
 	}
 	
-	private static Category buildCategory(Model model, Node node, Category parent) {
+	private static Category buildCategory(Category parent, Node node, Model model, Map<Node, Category> categories) {
 		Category category;
 		if (parent == null) {
 			category = model.getRootCategory();
@@ -90,35 +87,70 @@ public class TestDataUtils {
 			Password password = password(name, name + "_pwd");			
 			model.addPassword(category, password);
 		}
-		return category;
+
+		if (categories != null) {
+			categories.put(node, category);
+		}
 		
+		return category;		
 	}
 
-	private static Node node(String categoryName, int nbPasswords) {
+	private static Node node(Node parent, String categoryName, int nbPasswords) {
 		String[] passwordNames = new String[nbPasswords];
 		for (int i = 0;  i < nbPasswords; i++) {
 			passwordNames[i] = categoryName + "PasswordName" + i;
 		}
-		return node(categoryName, passwordNames);
+		
+		Node[] path;
+		if (parent == null) {
+			path = new Node[1];
+		} else {
+			path = new Node[parent.getPath().length + 1];
+			System.arraycopy(parent.getPath(), 0, path, 0, path.length - 1);
+		}
+		
+		Node node = node(categoryName, path, passwordNames);
+		path[path.length - 1] = node;
+		return node;
 	}
 	
 	public static Node node(String categoryName, String... passwordNames) {
-		return new Node(categoryName, passwordNames);
+		return node(categoryName, new Node[0], passwordNames);
+	}
+
+	private static Node node(String categoryName, Node[] pathElements, String[] passwordNames) {
+		return new Node(categoryName, passwordNames, pathElements);
 	}
 	
 	public static class Node {
 		private final String[] passwordNames;
 		private final String categoryName;
-		public Node(String categoryName, String[] passwordNames) {
+		private final Node[] pathElements;
+		public Node(String categoryName, String[] passwordNames, Node... pathElements) {
 			super();
 			this.passwordNames = passwordNames;
 			this.categoryName = categoryName;
+			this.pathElements = pathElements;
 		}
 		public String[] getPasswordNames() {
 			return passwordNames;
 		}
 		public String getCategoryName() {
 			return categoryName;
+		}
+
+		private Node[] getPath() {
+			return pathElements;
+		}
+		
+		public Category[] buildExpectedPath(Map<Node, Category> categories) {
+			Category[] result = new Category[pathElements.length];
+			int i = 0;
+			for (Node node : pathElements) {
+				result[i] = categories.get(node);
+				i++;
+			}
+			return result;
 		}
 	}
 }
