@@ -24,9 +24,11 @@ import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Model;
 import fr.duminy.safe.core.model.Password;
@@ -84,7 +86,7 @@ public class TestDataUtils {
 		}
 		
 		for (String name : node.getPasswordNames()) {
-			Password password = password(name, name + "_pwd");			
+			Password password = password(name);			
 			model.addPassword(category, password);
 		}
 
@@ -95,6 +97,30 @@ public class TestDataUtils {
 		return category;		
 	}
 
+	public static PasswordWithPath[] passwordWithPaths(String[] passwordNames, Node... pathElements) {
+		PasswordWithPath[] result = new PasswordWithPath[passwordNames.length];
+		int i = 0;
+		for (String passwordName : passwordNames) {
+			result[i] = passwordWithPath(password(passwordName), path(pathElements));
+			i++;
+		}
+		return result;
+	}
+
+	public static PasswordWithPath passwordWithPath(Password password, Category[] path) {
+		return new PasswordWithPath(Arrays.asList(path), password);
+	}
+
+	public static Category[] path(Node[] pathElements) {
+		Category[] result = new Category[pathElements.length];		
+		int i = 0;
+		for (Node node : pathElements) {
+			result[i] = category(node.getCategoryName());
+			i++;			
+		}
+		return result;
+	}
+	
 	private static Node node(Node parent, String categoryName, int nbPasswords) {
 		String[] passwordNames = new String[nbPasswords];
 		for (int i = 0;  i < nbPasswords; i++) {

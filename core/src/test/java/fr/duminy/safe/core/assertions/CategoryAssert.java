@@ -24,9 +24,9 @@ import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.allPasswords;
-import fr.duminy.safe.core.TestUtils;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -34,6 +34,7 @@ import org.fest.assertions.api.AbstractAssert;
 import org.fest.assertions.internal.Objects;
 
 import fr.duminy.safe.core.MutableInteger;
+import fr.duminy.safe.core.TestUtils;
 import fr.duminy.safe.core.Transformer;
 import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
@@ -94,7 +95,8 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 
 	public void hasPasswords(PasswordWithPath... passwords) {
 		List<PasswordWithPath> actualPasswords = Finders.findPassword(actual, null, true).getPasswordsWithPath();
-		assertThat(actualPasswords).usingElementComparator(PASSWORD_WITH_PATH_COMPARATOR).containsExactly(transform(passwords, pwdTransformer, passwords.length));
+		int expectedTransformations = (pwdTransformer == null) ? 0 : passwords.length;
+		assertThat(actualPasswords).usingElementComparator(PASSWORD_WITH_PATH_COMPARATOR).containsAll(Arrays.asList(transform(passwords, pwdTransformer, expectedTransformations)));
 	}
 
 	public CategoryAssert usingCategoryTransformer(Transformer<Category> categTransformer) {
@@ -104,7 +106,7 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 
 	public void hasCategories(Category... categories) {
 		List<Category> actualCategories = Finders.findCategory(actual, null).getFoundCategories();
-		assertThat(actualCategories).containsExactly(transform(categories, categTransformer, 1));
+		assertThat(actualCategories).containsAll(Arrays.asList(transform(categories, categTransformer, 1)));
 	}
 	
 	public static <T> T[] transform(T[] items, Transformer<T> transformer, int expectedTransformations) {

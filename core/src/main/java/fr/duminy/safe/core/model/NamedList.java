@@ -31,7 +31,7 @@ public class NamedList<T extends Named> extends AbstractList<T> implements Seria
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7792630680780973576L;
+	private static final long serialVersionUID = 2570032408884659914L;
 
 	private final String elementName;
 	
@@ -83,15 +83,19 @@ public class NamedList<T extends Named> extends AbstractList<T> implements Seria
 		return names.contains(name);
 	}
 
+	void throwDuplicateNameException(String name) {
+		throw new DuplicateNameException(elementName, name);
+	}
+	
 	private void checkDuplicateName(T element, int excludeIndex) {
 		if (contains(element.getName())) {
 			if (excludeIndex >= 0) {
 				T e = list.get(excludeIndex);
 				if ((e != null) && !e.getName().equals(element.getName())) {
-					throw new DuplicateNameException(elementName, element.getName());
+					throwDuplicateNameException(element.getName());
 				}
 			} else {
-				throw new DuplicateNameException(elementName, element.getName());
+				throwDuplicateNameException(element.getName());
 			}
         }
 	}

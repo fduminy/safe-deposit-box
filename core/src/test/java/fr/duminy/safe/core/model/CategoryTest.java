@@ -21,13 +21,16 @@
 package fr.duminy.safe.core.model;
 
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
+import static fr.duminy.safe.core.TestDataUtils.CHILD2;
 import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
+import static fr.duminy.safe.core.TestDataUtils.passwordWithPaths;
 import static fr.duminy.safe.core.TestUtils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,49 +45,114 @@ import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 public class CategoryTest {
 	@Test
+	public void testRename_SameNameAsChild() {
+		Exception e = testRename(CHILD, GRANDCHILD.getCategoryName(), passwordWithPaths(GRANDCHILD.getPasswordNames(), ROOT, GRANDCHILD, GRANDCHILD));
+		assertThat(e).isNull();
+	}
+	
+	@Test
+	public void testRename_SameNameAsParent() {
+		// we can't rename CHILD because test methods won't work
+		Exception e = testRename(GRANDCHILD, CHILD.getCategoryName());
+		assertThat(e).isNull();
+	}
+	
+	@Test
+	public void testRename_SameName() {
+		Exception e = testRename(CHILD, CHILD.getCategoryName());		
+		assertThat(e).isNull();
+	}
+	
+	@Test
+	public void testRename_DuplicateName() {
+		String child2 = CHILD2.getCategoryName();
+		Exception e = testRename(CHILD, child2);
+		assertThat(e).isExactlyInstanceOf(DuplicateNameException.class).hasMessageContaining("'" + child2 + "'");
+	}
+	
+	@Test
 	public void testRename_Root() {
-		testRename(ROOT);		
+		Exception e = testRename(ROOT, null);		
+		assertThat(e).isNull();
 	}
 	
 	@Test
 	public void testRename_Child() {
-		testRename(CHILD);		
+		Exception e = testRename(CHILD, null);		
+		assertThat(e).isNull();
 	}
 	
 	@Test
 	public void testRename_GrandChild() {
-		testRename(GRANDCHILD);		
+		Exception e = testRename(GRANDCHILD, null);		
+		assertThat(e).isNull();
 	}
 	
-	private void testRename(Node node) {
+	private DuplicateNameException testRename(Node node, String forcedNewName, PasswordWithPath... additionalExpectedPasswords) {
+		DuplicateNameException result = null;
+		
 		Map<Node, Category> allCategories = new HashMap<Node, Category>();
-		buildCategoryTree(allCategories);
+		Category root = buildCategoryTree(allCategories);
 		
 		// memorize initial state
-		final Category category = allCategories.get(node);
-		PasswordWithPath[] passwords = array(Finders.findPassword(category, null, true).getPasswordsWithPath(), PasswordWithPath.class);
-		Category[] categories = array(Finders.findCategory(category, null).getFoundCategories());
-		String name = category.getName();
+		State initialNodeState = new State(allCategories, node, additionalExpectedPasswords);
+		State initialRootState = new State(allCategories, ROOT);
 		
 		// rename
-		String name2 = name + "Renamed";
-		final Category category2 = category.rename(name2);
+		String name2 = (forcedNewName == null) ? initialNodeState.name + "Renamed" : forcedNewName;
+		Category category2;
+		try {
+			category2 = initialNodeState.category.rename(name2);
+		} catch (DuplicateNameException dne) {
+			result = dne;
+			
+			category2 = initialNodeState.category;
+			name2 = initialNodeState.name; // not renamed
+		}
 		
 		// check final state
-		assertThat(category.getName()).isEqualTo(name);
-		assertThat(category).hasPath(category);
-		assertThat(category).hasNoPassword().containsExactly(category);
+		assertThat(initialNodeState.category.getName()).isEqualTo(initialNodeState.name);
 		
-		assertThat(category2).isNotNull().isNotSameAs(category);		
-		assertThat(category2.getName()).isEqualTo(name2);
+		if (name2.equals(initialNodeState.name)) {
+			assertThat(category2).isSameAs(initialNodeState.category);
+		} else {		
+			assertThat(initialNodeState.category).hasPath(initialNodeState.category);
+			assertThat(initialNodeState.category).hasNoPassword().containsExactly(initialNodeState.category);				
+			assertThat(category2).isNotNull().isNotSameAs(initialNodeState.category);		
+			assertThat(category2.getName()).isEqualTo(name2);
+		}
 		
 		Category[] expectedPath = node.buildExpectedPath(allCategories);
 		expectedPath[expectedPath.length - 1] = category2;
 		assertThat(category2).hasPath(expectedPath);
 			
-		assertThat(category2).usingPasswordTransformer(replaceEndOfPathBy(category2)).hasPasswords(passwords);
+		checkFinalState(category2, initialNodeState, initialNodeState.category, category2);
+		if (node != ROOT) {
+			checkFinalState(root, initialRootState, initialNodeState.category, category2);
+		}
 		
-		assertThat(category2).usingCategoryTransformer(replace(category, category2)).hasCategories(categories);
+		return result;
+	}
+
+	private void checkFinalState(Category category, State initialState, Category beforeRename, Category afterRename) {
+		Transformer<PasswordWithPath> passwordTransformer = ROOT.getCategoryName().equals(category.getName()) ? null : replaceEndOfPathBy(category);
+		assertThat(category).usingPasswordTransformer(passwordTransformer).hasPasswords(initialState.passwords);		
+		assertThat(category).usingCategoryTransformer(replace(beforeRename, afterRename)).hasCategories(initialState.categories);
+	}
+	
+	private static class State {
+		private final Category category;
+		private final String name;
+		private final PasswordWithPath[] passwords;
+		private final Category[] categories;
+		public State(Map<Node, Category> allCategories, Node node, PasswordWithPath... additionalExpectedPasswords) {
+			category = allCategories.get(node);
+			List<PasswordWithPath> pwds = Finders.findPassword(category, null, true).getPasswordsWithPath();
+			pwds.addAll(Arrays.asList(additionalExpectedPasswords));
+			passwords = array(pwds, PasswordWithPath.class);
+			categories = array(Finders.findCategory(category, null).getFoundCategories());
+			name = category.getName();
+		}
 	}
 
 	private Transformer<PasswordWithPath> replaceEndOfPathBy(final Category category) {

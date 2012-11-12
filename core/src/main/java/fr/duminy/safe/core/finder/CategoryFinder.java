@@ -57,5 +57,21 @@ public class CategoryFinder implements Finder<CategoryFinderResult> {
 		public List<Category> getFoundCategories() {
 			return categories;
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder result = new StringBuilder("CategoryFinderResult[");
+			boolean begin = true;
+			for (Category category : categories) {
+				if (!begin) {
+					result.append(", ");					
+				}
+				begin = false;
+				
+				result.append(category.getName());
+			}
+			result.append(']');
+			return result.toString();
+		}
 	}
 }

@@ -26,12 +26,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class Category extends Named implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 360495040202283307L;
-    
-    private NamedList<Category> children;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7044805245877559179L;
+	private NamedList<Category> children;
     private NamedList<Password> passwords;
     private Category parent;
     
@@ -71,11 +70,27 @@ public class Category extends Named implements Serializable {
 	}
 
 	public Category rename(String name) {
-		Category category = new Category(this.parent, name, this.children, this.passwords);
+		// checks case of no rename
+		if (getName().equals(name)) {
+			return this;			
+		}
+		
+		// checks case of duplicate
+		if (parent != null) {
+			if (parent.children.contains(name)) {
+				parent.children.throwDuplicateNameException(name);
+			}
+		}
+		
+		// ok, we can rename safely
+		Category category = new Category(parent, name, children, passwords);
+		for (Category child : children) {
+			child.parent = category;
+		}
 		
 		if (parent != null) {
-			parent.children.remove(this);
-			parent.children.add(category);
+			parent.children.remove(this); //TODO implement and use Category.remove(Category)
+			parent.add(category);
 		}
 		
 		this.parent = null;
@@ -146,13 +161,17 @@ public class Category extends Named implements Serializable {
         @Override
         public boolean visit(Category category) {
             List<Category> path = category.getPath();            
+            buffer.append(System.getProperty("line.separator"));
+            indent(path.size() - 1);
             
             for (int i = 0; i < path.size(); i++) {
                 if (i > 0) {
-                    buffer.append('.');
+                    buffer.append('/');
                 }
                 buffer.append(path.get(i).getName());
             }
+            
+            buffer.append(" : ");
             return true;
         }
         
@@ -165,6 +184,12 @@ public class Category extends Named implements Serializable {
         @Override
         public String toString() {
             return buffer.toString();
+        }
+        
+        private void indent(int level) {
+        	for (int i = 0; i < level; i++) {
+        		buffer.append("    ");
+        	}
         }
     }
 }

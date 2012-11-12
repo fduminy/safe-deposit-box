@@ -137,7 +137,11 @@ public class TestUtils {
         }
         return data;
     }
-    	
+    
+    public static Password password(String name) {
+    	return password(name, name + "_pwd");
+    }
+    
     public static Password password(String name, String password) {
 		return new Password(name, password);
 	}

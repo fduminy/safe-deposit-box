@@ -73,7 +73,7 @@ public class PasswordFinder implements Finder<PasswordFinderResult> {
 		}
 	}
 	
-	public class PasswordWithPath {
+	public static class PasswordWithPath {
 		private final Password password;
 		private final List<Category> path;
 		public PasswordWithPath(List<Category> path, Password password) {
@@ -86,6 +86,23 @@ public class PasswordFinder implements Finder<PasswordFinderResult> {
 		}
 		public List<Category> getPath() {
 			return path;
+		}
+				
+		@Override
+		public String toString() {
+			StringBuilder result = new StringBuilder("PasswordWithPath[");
+			boolean begin = true;
+			for (Category category : path) {
+				if (!begin) {
+					result.append("/");					
+				}
+				begin = false;
+				
+				result.append(category.getName());
+			}
+			result.append(' ').append(password.getName());
+			result.append(']');
+			return result.toString();
 		}
 	}
 
