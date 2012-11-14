@@ -39,11 +39,85 @@ import org.junit.Test;
 
 import fr.duminy.safe.core.MutableInteger;
 import fr.duminy.safe.core.TestDataUtils.Node;
+import fr.duminy.safe.core.TestUtils;
+import fr.duminy.safe.core.TestUtils.CategoryFactory;
 import fr.duminy.safe.core.Transformer;
 import fr.duminy.safe.core.finder.Finders;
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 public class CategoryTest {
+	@Test
+	public void testRemoveCategory_DuplicateCategoryName() {
+		final Node categoryToRename = GRANDCHILD;
+		final String newCategoryName = CHILD2.getCategoryName();
+		final Node categoryToRemove = categoryToRename.getParent();
+		CategoryFactory categoryFactory = new CategoryFactory() {
+			@Override
+			public Category category(String name) {
+				if (name.equals(categoryToRename.getCategoryName())) {
+					name = newCategoryName;
+				}
+				return super.category(name);
+			}
+		};
+		Exception e = testRemoveCategory(categoryToRemove, categoryFactory, true);
+		assertThat(e).isExactlyInstanceOf(DuplicateNameException.class).hasMessageContaining("'" + newCategoryName + "'");
+	}
+
+	@Test
+	public void testRemoveCategory_Root() {
+		Exception e = testRemoveCategory(ROOT, null, false);
+		assertThat(e).isNull();
+	}
+
+	@Test
+	public void testRemoveCategory_Child() {
+		Exception e = testRemoveCategory(CHILD, null, false);
+		assertThat(e).isNull();
+	}
+
+	@Test
+	public void testRemoveCategory_GrandChild() {
+		Exception e = testRemoveCategory(GRANDCHILD, null, false);
+		assertThat(e).isNull();
+	}
+
+	private DuplicateNameException testRemoveCategory(Node node, CategoryFactory categoryFactory, boolean duplicate) {
+		DuplicateNameException result = null;
+				
+		// initializations
+		Map<Node, Category> allCategories = new HashMap<Node, Category>();
+		Category root = buildCategoryTree(allCategories, categoryFactory);
+		State initialRootState = new State(true, allCategories, ROOT);
+		
+		// remove category
+		Category category = allCategories.get(node);
+		try {
+			category.remove();
+		} catch (DuplicateNameException dne) {
+			result = dne;
+		}
+
+		// assertions
+		Transformer<PasswordWithPath> transformer = null;
+		if ((node != ROOT) && !duplicate) {
+			transformer = remove(category);
+		}
+		int expectedTransformations = (transformer == null) ? 0 : node.getPasswordNamesRecursively().length;
+		assertThat(root).usingPasswordTransformer(transformer).hasPasswordsRecursively(expectedTransformations, initialRootState.passwords);
+		
+		Category[] expectedCategories;
+		if ((node == ROOT) || duplicate) {
+			expectedCategories = initialRootState.categories;
+		} else {
+			expectedCategories = TestUtils.remove(initialRootState.categories, category);
+		}
+		assertThat(root).hasCategories(expectedCategories);
+		
+		return result;
+	}
+	
 	@Test
 	public void testRename_SameNameAsChild() {
 		Exception e = testRename(CHILD, GRANDCHILD.getCategoryName(), passwordWithPaths(GRANDCHILD.getPasswordNames(), ROOT, GRANDCHILD, GRANDCHILD));
@@ -146,8 +220,17 @@ public class CategoryTest {
 		private final PasswordWithPath[] passwords;
 		private final Category[] categories;
 		public State(Map<Node, Category> allCategories, Node node, PasswordWithPath... additionalExpectedPasswords) {
+			this(false, allCategories, node, additionalExpectedPasswords);
+		}
+		public State(boolean anyCategory, Map<Node, Category> allCategories, Node node, PasswordWithPath... additionalExpectedPasswords) {
 			category = allCategories.get(node);
-			List<PasswordWithPath> pwds = Finders.findPassword(category, null, true).getPasswordsWithPath();
+			PasswordFinderResult pfr;
+			if (anyCategory) {
+				pfr = Finders.findPassword(category, null, null, true);
+			} else {
+				pfr = Finders.findPassword(category, null, true);
+			}
+			List<PasswordWithPath> pwds = pfr.getPasswordsWithPath();
 			pwds.addAll(Arrays.asList(additionalExpectedPasswords));
 			passwords = array(pwds, PasswordWithPath.class);
 			categories = array(Finders.findCategory(category, null).getFoundCategories());
@@ -155,6 +238,21 @@ public class CategoryTest {
 		}
 	}
 
+	private Transformer<PasswordWithPath> remove(final Category category) {
+		return new Transformer<PasswordWithPath>() {
+			@Override
+			public PasswordWithPath transform(PasswordWithPath password, MutableInteger transformationCounter) {
+				List<Category> path = password.getPath();
+				int index = Named.indexOf(path, category);
+				if (index >= 0) {
+					path.remove(index);
+					transformationCounter.increment();
+				}
+				return password;
+			}			
+		};
+	}
+	
 	private Transformer<PasswordWithPath> replaceEndOfPathBy(final Category category) {
 		return new Transformer<PasswordWithPath>() {
 			@Override

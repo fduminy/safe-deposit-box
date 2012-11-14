@@ -59,7 +59,37 @@ public class Category extends Named implements Serializable {
         children.add(category);
         return this;
     }
-    
+
+    void remove() {
+    	if (parent != null) {    		
+    		// checks case of duplicate
+    		for (Category category : this.children) {
+    			checkParentHasNoCategory(category.getName());
+    		}			
+    		
+    		// move passwords to the parent
+    		Password[] passwordsToMove = new Password[this.passwords.size()];
+    		this.passwords.toArray(passwordsToMove);
+    		for (Password password : passwordsToMove) {
+    			remove(password);
+    			parent.add(password);
+    		}
+    		
+    		// move categories to the parent
+    		Category[] childrenToMove = new Category[this.children.size()];
+    		this.children.toArray(childrenToMove);
+    		for (Category category : childrenToMove) {
+    			children.remove(category);
+    			parent.add(category);
+    		}
+    		
+    		parent.children.remove(this);
+    		
+    		// detach from the parent
+    		parent = null;
+    	}
+    }
+
     Category add(Password password) {
         passwords.add(password);
         return this;
@@ -69,6 +99,12 @@ public class Category extends Named implements Serializable {
 		passwords.remove(password);
 	}
 
+	private void checkParentHasNoCategory(String category) {
+		if (parent.children.contains(category)) {
+			parent.children.throwDuplicateNameException(category);
+		}
+	}
+	
 	public Category rename(String name) {
 		// checks case of no rename
 		if (getName().equals(name)) {
@@ -77,9 +113,7 @@ public class Category extends Named implements Serializable {
 		
 		// checks case of duplicate
 		if (parent != null) {
-			if (parent.children.contains(name)) {
-				parent.children.throwDuplicateNameException(name);
-			}
+			checkParentHasNoCategory(name);
 		}
 		
 		// ok, we can rename safely
@@ -89,7 +123,7 @@ public class Category extends Named implements Serializable {
 		}
 		
 		if (parent != null) {
-			parent.children.remove(this); //TODO implement and use Category.remove(Category)
+			parent.children.remove(this);
 			parent.add(category);
 		}
 		

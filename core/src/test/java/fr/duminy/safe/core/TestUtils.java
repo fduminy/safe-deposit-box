@@ -24,6 +24,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -138,6 +140,16 @@ public class TestUtils {
         return data;
     }
     
+    public static class CategoryFactory {
+        public final Category category(Node node) {
+        	return category(node.getCategoryName());
+        }
+        
+        public Category category(String name) {
+    		return new Category(name);
+    	}
+    }
+    
     public static Password password(String name) {
     	return password(name, name + "_pwd");
     }
@@ -153,6 +165,12 @@ public class TestUtils {
     public static Category category(String name) {
 		return new Category(name);
 	}
+
+	public static Category[] remove(Category[] categories, Category... categoriesToRemove) {
+		List<Category> list = new ArrayList<Category>(Arrays.asList(categories));
+		list.removeAll(Arrays.asList(categoriesToRemove));
+    	return array(list);
+    }
     
 	public static Category[] array(Collection<Category> values) {    	
     	return array(values, Category.class);

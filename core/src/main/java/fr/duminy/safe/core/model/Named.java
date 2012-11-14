@@ -21,8 +21,20 @@
 package fr.duminy.safe.core.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Named implements Serializable {
+	public static <T extends Named> int indexOf(List<T> list, T named) {
+		int result = -1;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getName().equals(named.getName())) {
+				result = i;
+				break;
+			}
+		}
+		return result;
+	}
+	
     /**
      * 
      */

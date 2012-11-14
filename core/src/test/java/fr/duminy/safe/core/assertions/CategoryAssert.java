@@ -26,7 +26,6 @@ import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.allPasswords;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -37,6 +36,7 @@ import fr.duminy.safe.core.MutableInteger;
 import fr.duminy.safe.core.TestUtils;
 import fr.duminy.safe.core.Transformer;
 import fr.duminy.safe.core.finder.Finders;
+import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
@@ -93,12 +93,40 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 		return this;
 	}
 
-	public void hasPasswords(PasswordWithPath... passwords) {
-		List<PasswordWithPath> actualPasswords = Finders.findPassword(actual, null, true).getPasswordsWithPath();
-		int expectedTransformations = (pwdTransformer == null) ? 0 : passwords.length;
-		assertThat(actualPasswords).usingElementComparator(PASSWORD_WITH_PATH_COMPARATOR).containsAll(Arrays.asList(transform(passwords, pwdTransformer, expectedTransformations)));
+	public void hasPasswordsRecursively(PasswordWithPath... passwords) {
+		hasPasswordsRecursively(null, passwords);
 	}
 
+	public void hasPasswordsRecursively(Integer expectedTransformations, PasswordWithPath... passwords) {
+		hasPasswords(true, expectedTransformations, passwords);
+	}
+	
+	public void hasPasswords(PasswordWithPath... passwords) {		
+		hasPasswords(null, passwords);
+	}
+
+	public void hasPasswords(Integer expectedTransformations, PasswordWithPath... passwords) {		
+		hasPasswords(false, null, passwords);
+	}
+	
+	private void hasPasswords(boolean recursive, Integer expectedTransformations, PasswordWithPath... passwords) {
+		PasswordFinderResult pfr;
+		if (recursive) {
+			pfr = Finders.findPassword(actual, null, null, true);
+		} else {
+			pfr = Finders.findPassword(actual, null, true);
+		}
+		
+		List<PasswordWithPath> actualPasswords = pfr.getPasswordsWithPath();
+		int expectedNbTransformations;
+		if (expectedTransformations == null) {
+			expectedNbTransformations = (pwdTransformer == null) ? 0 : passwords.length;
+		} else {
+			expectedNbTransformations = expectedTransformations;
+		}
+		assertThat(actualPasswords).usingElementComparator(PASSWORD_WITH_PATH_COMPARATOR).containsOnly(transform(passwords, pwdTransformer, expectedNbTransformations));
+	}
+	
 	public CategoryAssert usingCategoryTransformer(Transformer<Category> categTransformer) {
 		this.categTransformer = categTransformer;
 		return this;
@@ -106,13 +134,16 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 
 	public void hasCategories(Category... categories) {
 		List<Category> actualCategories = Finders.findCategory(actual, null).getFoundCategories();
-		assertThat(actualCategories).containsAll(Arrays.asList(transform(categories, categTransformer, 1)));
+		assertThat(actualCategories).containsOnly(transform(categories, categTransformer, 1));
 	}
 	
 	public static <T> T[] transform(T[] items, Transformer<T> transformer, int expectedTransformations) {
 		MutableInteger transformationCounter = new MutableInteger();
-		T[] result = TestUtils.transform(items, transformer, transformationCounter);		
+		T[] result = TestUtils.transform(items, transformer, transformationCounter);
+		
+		expectedTransformations = (transformer == null) ? 0 : expectedTransformations;
 		assertThat(transformationCounter.getValue()).as("wrong number of transformations").isEqualTo(expectedTransformations);
+		
 		return result;
 	}	
 }

@@ -22,9 +22,21 @@ package fr.duminy.safe.core;
 
 public class MutableInteger {
 	private int value;
+
+	public MutableInteger() {
+		this(0);
+	}
 	
+	public MutableInteger(int i) {
+		setValue(i);
+	}
+
 	public int getValue() {
 		return value;
+	}
+	
+	public void setValue(int value) {
+		this.value = value;
 	}
 	
 	public void increment() {
