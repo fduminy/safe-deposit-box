@@ -219,10 +219,19 @@ abstract public class Core {
     	storage.store(input);
     }
     
-    protected final void reportError(String message, Exception e) {
+    public final void reportError(String message, Exception e) {
         if (message == null) {
-            message = (e == null) ? null : e.getMessage();
+        	Throwable cause = e;
+        	while ((cause != null) && (message == null)) {
+        		message = cause.getMessage();
+        		cause = cause.getCause();
+        	}
         }
+        
+        if ((message == null) || message.trim().isEmpty()) {
+        	message = "An unexpected error happened";
+        }
+        
         LOG.error(message, e);
         displayError(message, e);
     }
