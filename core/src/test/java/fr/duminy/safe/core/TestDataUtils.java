@@ -25,6 +25,8 @@ import static fr.duminy.safe.core.TestUtils.password;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,31 @@ public class TestDataUtils {
 	public static final Node GRANDCHILD = node(CHILD, "grandchild", 2);
 	public static final Node GRANDCHILD2 = node(CHILD, "grandchild2", 2);
 	private static final Node[] ALL_NODES = {ROOT, CHILD, CHILD2, GRANDCHILD, GRANDCHILD2};
+	private static final List<Node> NONE = Collections.emptyList();
 
+	private static Map<Node, List<Node>> DESCENDANTS = new HashMap<Node, List<Node>>();
+	static {
+		DESCENDANTS.put(ROOT, allNodesExcept(ROOT));
+		DESCENDANTS.put(CHILD, Collections.unmodifiableList(Arrays.asList(GRANDCHILD, GRANDCHILD2)));
+		DESCENDANTS.put(CHILD2, NONE);
+		DESCENDANTS.put(GRANDCHILD, NONE);
+		DESCENDANTS.put(GRANDCHILD2, NONE);
+	}
+
+	public static List<String> toCategoryNames(List<Category> categories) {
+		List<String> names = new ArrayList<String>(categories.size());
+		for (Category c : categories) {
+			names.add(c.getName());
+		}
+		return names;
+	}
+	
+	public static List<Node> allNodesExcept(Node... exceptions) {
+		List<Node> result = new ArrayList<Node>(Arrays.asList(ALL_NODES));
+		result.removeAll(Arrays.asList(exceptions));
+		return result;
+	}
+	
 	public static String[] allPasswordNames() {
 		List<String> names = new ArrayList<String>();
 		for (Node node : ALL_NODES) {
@@ -204,6 +230,10 @@ public class TestDataUtils {
 		}
 		public Node getParent() {
 			return parent;
+		}
+		
+		public List<Node> getDescendants() {
+			return DESCENDANTS.get(this);			
 		}
 	}
 }

@@ -24,18 +24,24 @@ import static fr.duminy.safe.core.TestDataUtils.CHILD;
 import static fr.duminy.safe.core.TestDataUtils.CHILD2;
 import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
+import static fr.duminy.safe.core.TestDataUtils.allNodesExcept;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.passwordWithPaths;
 import static fr.duminy.safe.core.TestUtils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
 import fr.duminy.safe.core.MutableInteger;
 import fr.duminy.safe.core.TestDataUtils.Node;
@@ -46,7 +52,30 @@ import fr.duminy.safe.core.finder.Finders;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordFinderResult;
 import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
+@RunWith(Theories.class)
 public class CategoryTest {
+	@DataPoints
+	public static final Node[] ALL_NODES = array(allNodesExcept(), Node.class);
+	
+	@Theory
+	public void testHasDescendant(Node node) {
+		// initializations
+		Map<Node, Category> allCategories = new HashMap<Node, Category>();
+		buildCategoryTree(allCategories);
+		final Category category = allCategories.get(node);
+		
+		final List<Category> expectedDescendants = new ArrayList<Category>(node.getDescendants().size());
+		for (Node descendant : node.getDescendants()) {
+			expectedDescendants.add(allCategories.get(descendant));
+		}
+		
+		List<Category> expectedNonDescendants = new ArrayList<Category>(allCategories.values());
+		expectedNonDescendants.removeAll(expectedDescendants);		
+		
+		// assertions
+		assertThat(category).hasDescendants(expectedDescendants).dontHasDescendants(expectedNonDescendants);
+	}
+	
 	@Test
 	public void testRemoveCategory_DuplicateCategoryName() {
 		final Node categoryToRename = GRANDCHILD;
@@ -101,14 +130,15 @@ public class CategoryTest {
 
 		// assertions
 		Transformer<PasswordWithPath> transformer = null;
-		if ((node != ROOT) && !duplicate) {
+		boolean expectNoChange = (node == ROOT) || duplicate; 
+		if (!expectNoChange) {
 			transformer = remove(category);
 		}
 		int expectedTransformations = (transformer == null) ? 0 : node.getPasswordNamesRecursively().length;
 		assertThat(root).usingPasswordTransformer(transformer).hasPasswordsRecursively(expectedTransformations, initialRootState.passwords);
 		
 		Category[] expectedCategories;
-		if ((node == ROOT) || duplicate) {
+		if (expectNoChange) {
 			expectedCategories = initialRootState.categories;
 		} else {
 			expectedCategories = TestUtils.remove(initialRootState.categories, category);

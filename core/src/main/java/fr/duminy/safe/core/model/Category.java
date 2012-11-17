@@ -60,6 +60,24 @@ public class Category extends Named implements Serializable {
         return this;
     }
 
+    public boolean hasDescendant(Category category) {
+    	if ((category == null) || (category == this)) {
+    		return false;
+    	}
+    	
+    	if (children.contains(category)) {
+    		return true;
+    	}
+    	
+    	for (Category child : children) {
+    		if (child.hasDescendant(category)) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
     public void remove() {
     	if (parent != null) {    		
     		// checks case of duplicate
@@ -173,7 +191,7 @@ public class Category extends Named implements Serializable {
     
     @Override
     public String toString() {
-        CategoryPrinter v = new CategoryPrinter(); 
+        CategoryPrinter v = new CategoryPrinter(false, false); 
         accept(v);
         return v.toString();
     }
@@ -190,7 +208,14 @@ public class Category extends Named implements Serializable {
     }
     
     private static class CategoryPrinter implements CategoryVisitor {
-        private StringBuilder buffer = new StringBuilder(); 
+        private final StringBuilder buffer = new StringBuilder(); 
+        private final boolean recursive;
+        private final boolean passwords;
+        
+        public CategoryPrinter(boolean recursive, boolean passwords) {
+        	this.recursive = recursive;
+        	this.passwords = passwords;
+        }
         
         @Override
         public boolean visit(Category category) {
@@ -205,13 +230,18 @@ public class Category extends Named implements Serializable {
                 buffer.append(path.get(i).getName());
             }
             
-            buffer.append(" : ");
-            return true;
+            if (passwords) {
+            	buffer.append(" : ");
+            }
+            
+            return recursive;
         }
         
         @Override
         public boolean visit(Password p) {
-            buffer.append(' ').append(p);
+        	if (passwords) {
+        		buffer.append(' ').append(p);
+        	}
             return true;
         }
         

@@ -20,16 +20,21 @@
  */
 package fr.duminy.safe.core.assertions;
 
+import static fr.duminy.safe.core.TestDataUtils.toCategoryNames;
 import static fr.duminy.safe.core.TestUtils.CATEGORY_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
 import static fr.duminy.safe.core.TestUtils.allPasswords;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import org.fest.assertions.api.AbstractAssert;
+import org.fest.assertions.description.Description;
+import org.fest.assertions.error.ErrorMessageFactory;
+import org.fest.assertions.internal.Failures;
 import org.fest.assertions.internal.Objects;
 
 import fr.duminy.safe.core.MutableInteger;
@@ -42,6 +47,8 @@ import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
 
 public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
+	private Failures failures = Failures.instance();
+	
 	private Transformer<PasswordWithPath> pwdTransformer;
 	private Transformer<Category> categTransformer;
 	
@@ -132,9 +139,10 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 		return this;
 	}
 
-	public void hasCategories(Category... categories) {
+	public CategoryAssert hasCategories(Category... categories) {
 		List<Category> actualCategories = Finders.findCategory(actual, null).getFoundCategories();
 		assertThat(actualCategories).containsOnly(transform(categories, categTransformer, 1));
+		return this;
 	}
 	
 	public static <T> T[] transform(T[] items, Transformer<T> transformer, int expectedTransformations) {
@@ -145,5 +153,55 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 		assertThat(transformationCounter.getValue()).as("wrong number of transformations").isEqualTo(expectedTransformations);
 		
 		return result;
-	}	
+	}
+
+	public CategoryAssert hasDescendants(List<Category> expectedDescendants) {
+		checkDescendants(expectedDescendants, true);
+		return this;
+	}
+
+	public CategoryAssert dontHasDescendants(List<Category> expectedNonDescendants) {
+		checkDescendants(expectedNonDescendants, false);
+		return this;
+	}
+	
+	private void checkDescendants(List<Category> candidates, boolean areDescendants) {
+		List<Category> descendants = new ArrayList<Category>();
+		List<Category> notDescendants = new ArrayList<Category>();
+		
+		for (Category candidate : candidates) {
+			if (actual.hasDescendant(candidate)) {
+				descendants.add(candidate);
+			} else {
+				notDescendants.add(candidate);
+			}
+		}
+		
+		boolean failure = areDescendants && !notDescendants.isEmpty();
+		failure |= !areDescendants && !descendants.isEmpty();
+
+		if (failure) {
+			final StringBuilder message = new StringBuilder("expecting category ").append(actual.getName());
+			if (areDescendants) {
+				message.append(" to have descendants:\n");
+			} else {
+				message.append(" to not have descendants:\n");
+			}
+			message.append(toCategoryNames(candidates));
+			
+			message.append("\nthese categories are descendants:\n").append(toCategoryNames(descendants));
+			message.append("\nthese categories are not descendants:\n").append(toCategoryNames(notDescendants));
+			
+			AssertionError error = failures.failure(getWritableAssertionInfo(), new ErrorMessageFactory() {				
+				@Override
+				public String create(Description d) {
+					if (d != null) {
+						message.insert(0, "[" + d.value() + "] ");
+					}
+					return message.toString();
+				}
+			});
+			throw error;
+		}
+	}
 }
