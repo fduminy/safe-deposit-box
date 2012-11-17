@@ -40,7 +40,10 @@ public enum MessageKey {
 	ACTION_REMOVE("action.remove"), //$NON-NLS-1$
 	ACTION_EXIT("action.exit"), //$NON-NLS-1$
 	ACTION_IMPORT("action.import"), //$NON-NLS-1$
-
+	ACTION_ADD_CATEGORY("action.add.category"),
+	ACTION_REMOVE_CATEGORY("action.remove.category"),
+	ACTION_RENAME_CATEGORY("action.rename.category"),
+	
 	ACTION_CREATE_DESCRIPTION("action.create.description"), //$NON-NLS-1$
 	ACTION_EDIT_DESCRIPTION("action.edit.description"), //$NON-NLS-1$
 	ACTION_ADD_DESCRIPTION("action.add.description"), //$NON-NLS-1$
@@ -48,7 +51,11 @@ public enum MessageKey {
 	ACTION_UPDATE_DESCRIPTION("action.update.description"), //$NON-NLS-1$
 	ACTION_REMOVE_DESCRIPTION("action.remove.description"), //$NON-NLS-1$
 	ACTION_EXIT_DESCRIPTION("action.exit.description"), //$NON-NLS-1$
-	ACTION_IMPORT_DESCRIPTION("action.import.description"); //$NON-NLS-1$
+	ACTION_IMPORT_DESCRIPTION("action.import.description"), //$NON-NLS-1$
+	
+	ACTION_ADD_CATEGORY_DESCRIPTION("action.add.category.description"),
+	ACTION_REMOVE_CATEGORY_DESCRIPTION("action.remove.category.description"),
+	ACTION_RENAME_CATEGORY_DESCRIPTION("action.rename.category.description");
 	
 	public static MessageKey fromKey(String key) {
 		for (MessageKey m : values()) {

@@ -35,10 +35,9 @@ import fr.duminy.safe.swing.action.Action;
 import fr.duminy.safe.swing.command.Command;
 
 @SuppressWarnings("serial")
-public class PasswordListPanel extends SPanel {
+public class PasswordListPanel extends SPanel<SwingCore> {
 	private final JXTable passwordList;
 	private final PasswordTableModel model;
-	private final SwingCore core;
 
 	public PasswordListPanel() throws Exception {
 		this(new SwingCore());
@@ -47,7 +46,7 @@ public class PasswordListPanel extends SPanel {
 	 * Create the panel.
 	 */
 	public PasswordListPanel(final SwingCore core) {
-		this.core = core;
+		super(core);
 		
 		setLayout(new BorderLayout(0, 0));
 		

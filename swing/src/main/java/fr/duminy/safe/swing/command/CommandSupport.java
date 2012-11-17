@@ -27,10 +27,20 @@ import org.jdesktop.swingx.action.Targetable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.duminy.safe.core.Core;
+
 public class CommandSupport implements Targetable {
     private static final Logger LOG = LoggerFactory.getLogger(CommandSupport.class);
 	
+    private final Core core;
 	private final Map<String, Command> commands = new HashMap<String, Command>(); 
+	
+	public CommandSupport(Core core) {
+		if (core == null) {
+			throw new Error("core is null");
+		}
+		this.core = core;
+	}
 	
 	public void addCommand(Command command) {
 		LOG.debug("adding command '{}'", command.getName());
@@ -43,8 +53,12 @@ public class CommandSupport implements Targetable {
 		String cmdName = convertCommandtoString(command);
 		Command cmd = commands.get(cmdName);
 		if (cmd != null) {
-			LOG.debug("executing command '{}'", cmdName);			
-			cmd.run();
+			LOG.debug("executing command '{}'", cmdName);
+			try {
+				cmd.run();
+			} catch (Exception e) {
+				core.reportError(e.getMessage(), e);
+			}
 			result = true;
 		} else {
 			LOG.debug("no command for name '{}'", cmdName);

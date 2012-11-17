@@ -77,8 +77,8 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
     protected void initialize(String[] args) {
         super.initialize(args);
         try {
-        	support = new CommandSupport();
             core = new SwingCore();
+        	support = new CommandSupport(core);
             core.setApplication(this);
             
             core.start();            
@@ -257,7 +257,7 @@ public class SwingApplication extends SingleFrameApplication implements Targetab
         removeExitListener(exitListener);
         exitListener = null;
         
-        SPanel panel = getMainPanel();
+        MainPanel panel = getMainPanel();
         panel.dispose();
         getMainView().setComponent(null);
     	

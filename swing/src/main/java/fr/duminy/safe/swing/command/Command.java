@@ -23,7 +23,7 @@ package fr.duminy.safe.swing.command;
 import fr.duminy.safe.swing.action.Action;
 
 abstract public class Command {
-	private final Action action;
+	protected final Action action;
 	
 	public Command(Action action) {
 		this.action = action;

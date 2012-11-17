@@ -60,7 +60,7 @@ public class Category extends Named implements Serializable {
         return this;
     }
 
-    void remove() {
+    public void remove() {
     	if (parent != null) {    		
     		// checks case of duplicate
     		for (Category category : this.children) {

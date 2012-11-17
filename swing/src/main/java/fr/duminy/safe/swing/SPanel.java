@@ -27,14 +27,18 @@ import org.jdesktop.swingx.action.TargetManager;
 import org.jdesktop.swingx.action.Targetable;
 import org.picocontainer.Disposable;
 
+import fr.duminy.safe.core.Core;
 import fr.duminy.safe.swing.command.Command;
 import fr.duminy.safe.swing.command.CommandSupport;
 
 @SuppressWarnings("serial")
-public class SPanel extends JXPanel implements Targetable, Disposable {
-	private CommandSupport support = new CommandSupport();
+public class SPanel<T extends Core> extends JXPanel implements Targetable, Disposable {
+	private CommandSupport support;
+	protected final T core;
 	
-	public SPanel() {
+	public SPanel(T core) {
+		this.core = core;
+		support = new CommandSupport(core);
 		TargetManager.getInstance().addTarget(this);
 	}
 	

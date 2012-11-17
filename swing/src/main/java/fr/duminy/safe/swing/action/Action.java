@@ -21,6 +21,9 @@
 package fr.duminy.safe.swing.action;
 
 import static fr.duminy.safe.swing.MessageKey.ACTION_ADD;
+import static fr.duminy.safe.swing.MessageKey.ACTION_ADD_CATEGORY;
+import static fr.duminy.safe.swing.MessageKey.ACTION_REMOVE_CATEGORY;
+import static fr.duminy.safe.swing.MessageKey.ACTION_RENAME_CATEGORY;
 import static fr.duminy.safe.swing.MessageKey.ACTION_CANCEL;
 import static fr.duminy.safe.swing.MessageKey.ACTION_CREATE;
 import static fr.duminy.safe.swing.MessageKey.ACTION_EDIT;
@@ -44,7 +47,10 @@ public enum Action {
 	UPDATE_PASSWORD("update-password", ACTION_UPDATE, false), //$NON-NLS-1$
 	REMOVE_PASSWORD("remove-password", ACTION_REMOVE, false), //$NON-NLS-1$
 	EXIT("exit", ACTION_EXIT, true), //$NON-NLS-1$
-	IMPORT("import", ACTION_IMPORT, true); //$NON-NLS-1$
+	IMPORT("import", ACTION_IMPORT, true), //$NON-NLS-1$
+	ADD_CATEGORY("add-category", ACTION_ADD_CATEGORY, true), //$NON-NLS-1$
+	REMOVE_CATEGORY("remove-category", ACTION_REMOVE_CATEGORY, true), //$NON-NLS-1$
+	RENAME_CATEGORY("rename-category", ACTION_RENAME_CATEGORY, true); //$NON-NLS-1$
 	
 	private final String name;
 	private final MessageKey labelKey;

@@ -33,12 +33,13 @@ import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.command.Command;
 
 @SuppressWarnings("serial")
-public class PasswordForm extends SPanel {
+public class PasswordForm extends SPanel<SwingCore> {
 	private final PasswordFormButtons passwordFormButtons;
 	private final PasswordFormFields passwordFormFields;
 	private FormState state = READ;
 	
-	public PasswordForm() {
+	public PasswordForm(SwingCore core) {
+		super(core);
 		setLayout(new BorderLayout(0, 0));
 		
 		passwordFormButtons = new PasswordFormButtons();

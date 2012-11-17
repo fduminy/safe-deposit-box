@@ -20,25 +20,16 @@
  */
 package fr.duminy.safe.swing;
 
-import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import fr.duminy.safe.core.model.Category;
 
-public class CategoryNode extends AbstractMutableTreeTableNode {
+@SuppressWarnings("serial")
+public class CategoryNode extends DefaultMutableTreeNode {
 	public CategoryNode(Category category) {
 		super(category);
 	}
-
-	@Override
-	public Object getValueAt(int column) {
-		return getCategory().getName();
-	}
-
-	@Override
-	public int getColumnCount() {
-		return 1;
-	}
-
+	
 	public Category getCategory() {
 		return (Category)getUserObject();
 	}

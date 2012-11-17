@@ -47,7 +47,7 @@ import fr.duminy.safe.core.model.Password;
 import fr.duminy.safe.swing.command.Command;
 
 @SuppressWarnings("serial")
-public class MainPanel extends SPanel {
+public class MainPanel extends SPanel<SwingCore> {
     private static final Logger LOG = LoggerFactory.getLogger(MainPanel.class);
     
 	private PasswordListPanel passwordList;
@@ -61,6 +61,8 @@ public class MainPanel extends SPanel {
 	 * Create the panel.
 	 */
 	public MainPanel(final SwingCore core) {
+		super(core);
+		
 		LOG.debug("new instance of MainPanel. callstack", new Exception("callstack"));
 		setLayout(new BorderLayout(0, 0));
 		
@@ -70,7 +72,7 @@ public class MainPanel extends SPanel {
 		categoriesPanel = new CategoriesPanel(core);
 		add(categoriesPanel, BorderLayout.WEST);
 		
-		passwordForm = new PasswordForm();
+		passwordForm = new PasswordForm(core);
 		add(passwordForm, BorderLayout.SOUTH);
 		
 		JToolBar toolBar = new JToolBar();
@@ -100,7 +102,7 @@ public class MainPanel extends SPanel {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
 				Category c = categoriesPanel.getSelectedCategory();
-				List<Password> passwords = Finders.findPassword(c, null, false).getPasswords();
+				List<Password> passwords = (c == null) ? null : Finders.findPassword(c, null, false).getPasswords();
 				passwordList.refresh(passwords);
 			}
 		});
@@ -142,7 +144,7 @@ public class MainPanel extends SPanel {
 				passwordForm.viewPassword(password);
 				passwordList.updatePassword(password);
 			}
-		});
+		});		
 	}
 	
 	public void refresh() {
