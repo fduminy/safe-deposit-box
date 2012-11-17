@@ -21,7 +21,7 @@
 package fr.duminy.safe.core.assertions;
 
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
-import static fr.duminy.safe.core.TestUtils.array;
+import static fr.duminy.safe.core.Utils.array;
 
 import java.util.Comparator;
 

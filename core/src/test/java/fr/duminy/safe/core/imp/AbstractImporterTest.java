@@ -22,6 +22,7 @@ package fr.duminy.safe.core.imp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static fr.duminy.safe.core.Utils.array;
 
 import java.io.StringWriter;
 
@@ -35,7 +36,7 @@ import fr.duminy.safe.core.model.Model;
 
 @RunWith(Theories.class)
 abstract public class AbstractImporterTest {
-	@DataPoints public static final Importer[] IMPORTERS = new FakeCore().getImporters().toArray(new Importer[0]);
+	@DataPoints public static final Importer[] IMPORTERS = array(new FakeCore().getImporters(), Importer.class);
 		
 	protected static final String[] REQUIRED_COLUMNS = CsvImporter.COLUMN_NAMES;
 	

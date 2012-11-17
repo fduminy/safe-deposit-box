@@ -20,6 +20,8 @@
  */
 package fr.duminy.safe.swing.command;
 
+import static fr.duminy.safe.core.Utils.array;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,7 +73,7 @@ public class CommandSupport implements Targetable {
 	}
 	@Override
 	public String[] getCommands() {
-		return commands.keySet().toArray(new String[commands.size()]);
+		return array(commands.keySet(), String.class);
 	}
 	
 	public void removeCommands() {

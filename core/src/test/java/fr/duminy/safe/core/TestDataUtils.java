@@ -22,6 +22,7 @@ package fr.duminy.safe.core;
 
 import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.TestUtils.password;
+import static fr.duminy.safe.core.Utils.array;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +78,7 @@ public class TestDataUtils {
 				names.add(name);
 			}
 		}
-		return names.toArray(new String[names.size()]);
+		return array(names, String.class);
 	}
 	
 	public static Model buildModel() {
@@ -209,7 +210,7 @@ public class TestDataUtils {
 			for (Node child : children) {
 				passwords.addAll(Arrays.asList(child.getPasswordNames()));
 			}
-			return passwords.toArray(new String[passwords.size()]);
+			return array(passwords, String.class);
 		}
 		public String getCategoryName() {
 			return categoryName;

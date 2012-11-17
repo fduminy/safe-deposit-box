@@ -20,6 +20,7 @@
  */
 package fr.duminy.safe.core.model;
 
+import static fr.duminy.safe.core.Utils.array;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,17 +87,13 @@ public class Category extends Named implements Serializable {
     		}			
     		
     		// move passwords to the parent
-    		Password[] passwordsToMove = new Password[this.passwords.size()];
-    		this.passwords.toArray(passwordsToMove);
-    		for (Password password : passwordsToMove) {
+    		for (Password password : array(passwords, Password.class)) {
     			remove(password);
     			parent.add(password);
     		}
     		
     		// move categories to the parent
-    		Category[] childrenToMove = new Category[this.children.size()];
-    		this.children.toArray(childrenToMove);
-    		for (Category category : childrenToMove) {
+    		for (Category category : array(children)) {
     			children.remove(category);
     			parent.add(category);
     		}

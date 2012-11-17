@@ -22,9 +22,13 @@ package fr.duminy.safe.core;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.duminy.safe.core.model.Category;
 
 public class Utils {
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
@@ -45,4 +49,21 @@ public class Utils {
     public static boolean isBlank(String value) {
     	return (value == null) || value.trim().isEmpty();
     }
+    
+	public static Category[] array(Collection<Category> values) {    	
+    	return array(values, Category.class);
+    }
+
+	public static <T> T[] array(Collection<T> values, Class<T> clazz) {    	
+    	return values.toArray(newArray(values, clazz));
+    }
+	
+	public static <T> T[] newArray(Collection<T> values, Class<T> clazz) {
+    	return newArray(clazz, values.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] newArray(Class<T> clazz, int size) {    	
+    	return (T[]) Array.newInstance(clazz, size);
+    }    
 }

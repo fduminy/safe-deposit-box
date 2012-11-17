@@ -27,7 +27,7 @@ import static fr.duminy.safe.core.TestDataUtils.ROOT;
 import static fr.duminy.safe.core.TestDataUtils.allNodesExcept;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.passwordWithPaths;
-import static fr.duminy.safe.core.TestUtils.array;
+import static fr.duminy.safe.core.Utils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 

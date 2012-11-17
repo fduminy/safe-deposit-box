@@ -27,7 +27,7 @@ import static fr.duminy.safe.core.TestDataUtils.allPasswordNames;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.node;
 import static fr.duminy.safe.core.TestUtils.PASSWORD_WITH_PATH_COMPARATOR;
-import static fr.duminy.safe.core.TestUtils.array;
+import static fr.duminy.safe.core.Utils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static fr.duminy.safe.core.finder.Finders.getPasswords;
 import static org.fest.assertions.api.Assertions.assertThat;

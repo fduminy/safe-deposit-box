@@ -23,6 +23,7 @@ package fr.duminy.safe.swing;
 import static fr.duminy.safe.swing.action.Action.ADD_CATEGORY;
 import static fr.duminy.safe.swing.action.Action.REMOVE_CATEGORY;
 import static fr.duminy.safe.swing.action.Action.RENAME_CATEGORY;
+import static fr.duminy.safe.core.Utils.array;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseEvent;
@@ -303,7 +304,7 @@ public class CategoriesPanel extends SPanel<SwingCore> {
 		Collections.reverse(categoryPath);
 		TreePath result = null;
 		if (!categoryPath.isEmpty()) {
-			result = new TreePath(categoryPath.toArray(new CategoryNode[categoryPath.size()]));
+			result = new TreePath(array(categoryPath, CategoryNode.class));
 		}
 		return result;
 	}

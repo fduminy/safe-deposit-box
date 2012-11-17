@@ -20,10 +20,11 @@
  */
 package fr.duminy.safe.core;
 
+import static fr.duminy.safe.core.Utils.array;
+import static fr.duminy.safe.core.Utils.newArray;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -117,7 +118,7 @@ public class TestUtils {
 	}
 	
 	public static Category[] join(Collection<Category> list, Category... items) {
-		return join(Category.class, list.toArray(newArray(list, Category.class)), items);
+		return join(Category.class, array(list, Category.class), items);
 	}
 	
 	public static void assertArrayNotEquals(String message, byte[] expected,
@@ -171,24 +172,7 @@ public class TestUtils {
 		list.removeAll(Arrays.asList(categoriesToRemove));
     	return array(list);
     }
-    
-	public static Category[] array(Collection<Category> values) {    	
-    	return array(values, Category.class);
-    }
-
-	public static <T> T[] array(Collection<T> values, Class<T> clazz) {    	
-    	return values.toArray(newArray(values, clazz));
-    }
-	
-	private static <T> T[] newArray(Collection<T> values, Class<T> clazz) {    	
-    	return newArray(clazz, values.size());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T[] newArray(Class<T> clazz, int size) {    	
-    	return (T[]) Array.newInstance(clazz, size);
-    }
-    
+        
     /**
      * TODO use FEST assert 2.9-SNAPSHOT or more, supporting this kid of assertion.
      * @param list
