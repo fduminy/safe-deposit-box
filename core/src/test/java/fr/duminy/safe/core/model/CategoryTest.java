@@ -29,9 +29,11 @@ import static fr.duminy.safe.core.TestDataUtils.allCategoriesExcept;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.passwordWithPaths;
 import static fr.duminy.safe.core.TestDataUtils.toCategories;
+import static fr.duminy.safe.core.TestUtils.category;
 import static fr.duminy.safe.core.Utils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static fr.duminy.safe.core.model.Category.buildCategoryName;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +63,37 @@ public class CategoryTest {
 	@DataPoint public static final NodeData ND_GRANDCHILD = new NodeData(GRANDCHILD, canMoveTo(ROOT, CHILD2, GRANDCHILD2));
 	@DataPoint public static final NodeData ND_GRANDCHILD2 = new NodeData(GRANDCHILD2, canMoveTo(ROOT, CHILD2, GRANDCHILD));
 
+	@Test
+	public void testFindUniqueNameForChild_DuplicateBaseName2() {
+		String baseName = CHILD.getCategoryName();
+		String additionalChild = buildCategoryName(baseName, 2);
+		testFindUniqueNameForChild(baseName, buildCategoryName(baseName, 3), additionalChild);
+	}
+
+	@Test
+	public void testFindUniqueNameForChild_DuplicateBaseName() {
+		String baseName = CHILD.getCategoryName();
+		testFindUniqueNameForChild(baseName, buildCategoryName(baseName, 2), null);
+	}
+
+	@Test
+	public void testFindUniqueNameForChild_NoDuplicate() {
+		String baseName = "uniqueName";
+		testFindUniqueNameForChild(baseName, baseName, null);
+	}
+	
+	private void testFindUniqueNameForChild(String baseName, String expectedUniqueName, String additionalChild) {
+		// initializations
+		Map<Node, Category> allCategories = new HashMap<Node, Category>();
+		Category root = buildCategoryTree(allCategories);
+		if (additionalChild != null) {
+			root.add(category(additionalChild));
+		}
+		
+		String uniqueName = root.findUniqueNameForChild(baseName);
+		assertThat(uniqueName).isEqualTo(expectedUniqueName);
+	}
+	
 	@Theory
 	public void testCanMoveTo(NodeData data) {
 		// initializations

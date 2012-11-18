@@ -60,7 +60,25 @@ public class Category extends Named implements Serializable {
         children.add(category);
         return this;
     }
+    
+    static String buildCategoryName(String baseName, int id) {
+    	return baseName + "(" + id + ")";
+    }
 
+    public String findUniqueNameForChild(String baseName) {
+    	String result;
+    	if (!children.contains(baseName)) {
+    		result = baseName;
+    	} else {
+    		int i = 2;
+    		do {
+    			result = buildCategoryName(baseName, i);
+    			i++;
+    		} while (children.contains(result));
+    	}
+    	return result;
+    }
+    
     public boolean canMoveTo(Category newParent) {
     	return (newParent != this) && (newParent != parent) && !hasDescendant(newParent);
     }
