@@ -47,6 +47,20 @@ import fr.duminy.safe.core.model.Category;
 import fr.duminy.safe.core.model.Password;
 
 public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
+	private static ListCondition CAN_MOVE_TO = new AbstractListCondition("be movable to", "move targets") {
+		@Override
+		public boolean matches(Category actual, Category listElement) {
+			return actual.canMoveTo(listElement);
+		}
+	};
+	
+	private static ListCondition HAS_DESCENDANT = new AbstractListCondition("have descendants", "descendants") {
+		@Override
+		public boolean matches(Category actual, Category listElement) {
+			return actual.hasDescendant(listElement);
+		}
+	};
+	
 	private Failures failures = Failures.instance();
 	
 	private Transformer<PasswordWithPath> pwdTransformer;
@@ -156,41 +170,53 @@ public class CategoryAssert extends AbstractAssert<CategoryAssert, Category> {
 	}
 
 	public CategoryAssert hasDescendants(List<Category> expectedDescendants) {
-		checkDescendants(expectedDescendants, true);
+		checkList(expectedDescendants, HAS_DESCENDANT, true);
 		return this;
 	}
 
 	public CategoryAssert dontHasDescendants(List<Category> expectedNonDescendants) {
-		checkDescendants(expectedNonDescendants, false);
+		checkList(expectedNonDescendants, HAS_DESCENDANT, false);
 		return this;
 	}
 	
-	private void checkDescendants(List<Category> candidates, boolean areDescendants) {
-		List<Category> descendants = new ArrayList<Category>();
-		List<Category> notDescendants = new ArrayList<Category>();
+	public CategoryAssert canMoveTo(List<Category> expectedCanMoveTo) {
+		checkList(expectedCanMoveTo, CAN_MOVE_TO, true);
+		return this;
+	}
+
+	public CategoryAssert canNotMoveTo(List<Category> expectedCanNotMoveTo) {
+		checkList(expectedCanNotMoveTo, CAN_MOVE_TO, false);
+		return this;
+	}
+
+	private void checkList(List<Category> candidates, ListCondition condition, boolean expected) {
+		List<Category> matching = new ArrayList<Category>();
+		List<Category> notMatching = new ArrayList<Category>();
 		
 		for (Category candidate : candidates) {
-			if (actual.hasDescendant(candidate)) {
-				descendants.add(candidate);
+			if (condition.matches(actual, candidate)) {
+				matching.add(candidate);
 			} else {
-				notDescendants.add(candidate);
+				notMatching.add(candidate);
 			}
 		}
 		
-		boolean failure = areDescendants && !notDescendants.isEmpty();
-		failure |= !areDescendants && !descendants.isEmpty();
+		boolean failure = expected && !notMatching.isEmpty();
+		failure |= !expected && !matching.isEmpty();
 
 		if (failure) {
 			final StringBuilder message = new StringBuilder("expecting category ").append(actual.getName());
-			if (areDescendants) {
-				message.append(" to have descendants:\n");
+			String verb = condition.getTestedPropertyVerb();
+			if (expected) {
+				message.append(" to ").append(verb).append(":\n");
 			} else {
-				message.append(" to not have descendants:\n");
+				message.append(" to not ").append(verb).append(":\n");
 			}
 			message.append(toCategoryNames(candidates));
-			
-			message.append("\nthese categories are descendants:\n").append(toCategoryNames(descendants));
-			message.append("\nthese categories are not descendants:\n").append(toCategoryNames(notDescendants));
+
+			String attribute = condition.getTestedPropertyAttribute();
+			message.append("\nthese categories are ").append(attribute).append(":\n").append(toCategoryNames(matching));
+			message.append("\nthese categories are not ").append(attribute).append(":\n").append(toCategoryNames(notMatching));
 			
 			AssertionError error = failures.failure(getWritableAssertionInfo(), new ErrorMessageFactory() {				
 				@Override

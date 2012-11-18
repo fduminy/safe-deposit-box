@@ -23,22 +23,23 @@ package fr.duminy.safe.core.model;
 import static fr.duminy.safe.core.TestDataUtils.CHILD;
 import static fr.duminy.safe.core.TestDataUtils.CHILD2;
 import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD;
+import static fr.duminy.safe.core.TestDataUtils.GRANDCHILD2;
 import static fr.duminy.safe.core.TestDataUtils.ROOT;
-import static fr.duminy.safe.core.TestDataUtils.allNodesExcept;
+import static fr.duminy.safe.core.TestDataUtils.allCategoriesExcept;
 import static fr.duminy.safe.core.TestDataUtils.buildCategoryTree;
 import static fr.duminy.safe.core.TestDataUtils.passwordWithPaths;
+import static fr.duminy.safe.core.TestDataUtils.toCategories;
 import static fr.duminy.safe.core.Utils.array;
 import static fr.duminy.safe.core.assertions.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
@@ -54,26 +55,40 @@ import fr.duminy.safe.core.finder.PasswordFinder.PasswordWithPath;
 
 @RunWith(Theories.class)
 public class CategoryTest {
-	@DataPoints
-	public static final Node[] ALL_NODES = array(allNodesExcept(), Node.class);
-	
+	@DataPoint public static final NodeData ND_ROOT = new NodeData(ROOT, canMoveTo());
+	@DataPoint public static final NodeData ND_CHILD = new NodeData(CHILD, canMoveTo(CHILD2));
+	@DataPoint public static final NodeData ND_CHILD2 = new NodeData(CHILD2, canMoveTo(CHILD, GRANDCHILD, GRANDCHILD2));
+	@DataPoint public static final NodeData ND_GRANDCHILD = new NodeData(GRANDCHILD, canMoveTo(ROOT, CHILD2, GRANDCHILD2));
+	@DataPoint public static final NodeData ND_GRANDCHILD2 = new NodeData(GRANDCHILD2, canMoveTo(ROOT, CHILD2, GRANDCHILD));
+
 	@Theory
-	public void testHasDescendant(Node node) {
+	public void testCanMoveTo(NodeData data) {
 		// initializations
 		Map<Node, Category> allCategories = new HashMap<Node, Category>();
 		buildCategoryTree(allCategories);
-		final Category category = allCategories.get(node);
-		
-		final List<Category> expectedDescendants = new ArrayList<Category>(node.getDescendants().size());
-		for (Node descendant : node.getDescendants()) {
-			expectedDescendants.add(allCategories.get(descendant));
-		}
-		
-		List<Category> expectedNonDescendants = new ArrayList<Category>(allCategories.values());
-		expectedNonDescendants.removeAll(expectedDescendants);		
+		Category category = allCategories.get(data.node);
 		
 		// assertions
-		assertThat(category).hasDescendants(expectedDescendants).dontHasDescendants(expectedNonDescendants);
+		List<Category> expectedCanMoveTo = toCategories(allCategories, data.moveTargets);		
+		assertThat(category).canMoveTo(expectedCanMoveTo);
+		
+		List<Category> expectedCanNotMoveTo = allCategoriesExcept(allCategories, expectedCanMoveTo);
+		assertThat(category).canNotMoveTo(expectedCanNotMoveTo);
+	}
+	
+	@Theory
+	public void testHasDescendant(NodeData data) {
+		// initializations
+		Map<Node, Category> allCategories = new HashMap<Node, Category>();
+		buildCategoryTree(allCategories);
+		Category category = allCategories.get(data.node);
+		
+		// assertions
+		List<Category> expectedDescendants = toCategories(allCategories, data.node.getDescendants());		
+		assertThat(category).hasDescendants(expectedDescendants);
+		
+		List<Category> expectedNonDescendants = allCategoriesExcept(allCategories, expectedDescendants);
+		assertThat(category).dontHasDescendants(expectedNonDescendants);
 	}
 	
 	@Test
@@ -306,5 +321,18 @@ public class CategoryTest {
 				return c;
 			}			
 		};
+	}
+
+	private static Node[] canMoveTo(Node... moveTargets) {
+		return moveTargets;
+	}
+	private static class NodeData {
+		private final Node node;
+		private final List<Node> moveTargets;
+		public NodeData(Node node, Node... moveTargets) {
+			super();
+			this.node = node;
+			this.moveTargets = Arrays.asList(moveTargets);
+		}
 	}
 }

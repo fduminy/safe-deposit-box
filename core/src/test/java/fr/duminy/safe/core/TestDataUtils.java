@@ -56,7 +56,21 @@ public class TestDataUtils {
 		DESCENDANTS.put(GRANDCHILD, NONE);
 		DESCENDANTS.put(GRANDCHILD2, NONE);
 	}
-
+	
+	public static List<Category> toCategories(Map<Node, Category> allCategories, List<Node> nodes) {
+		final List<Category> result = new ArrayList<Category>(nodes.size());
+		for (Node node : nodes) {
+			result.add(allCategories.get(node));
+		}
+		return result;
+	}
+	
+	public static List<Category> allCategoriesExcept(Map<Node, Category> allCategories, List<Category> exceptions) {
+		List<Category> result = new ArrayList<Category>(allCategories.values());
+		result.removeAll(exceptions);
+		return result;
+	}
+	
 	public static List<String> toCategoryNames(List<Category> categories) {
 		List<String> names = new ArrayList<String>(categories.size());
 		for (Category c : categories) {

@@ -61,6 +61,10 @@ public class Category extends Named implements Serializable {
         return this;
     }
 
+    public boolean canMoveTo(Category newParent) {
+    	return (newParent != this) && (newParent != parent) && !hasDescendant(newParent);
+    }
+    
     public boolean hasDescendant(Category category) {
     	if ((category == null) || (category == this)) {
     		return false;
